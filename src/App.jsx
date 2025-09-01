@@ -21,7 +21,7 @@ function App() {
         <Route path='/dashboard' element={<Dashboard />} />
 
         {/* Truqie route */}
-        <Route path='/truqie' element={<Truique />} />
+        <Route path='/truique' element={<Truique />} />
 
         {/* Settings route */}
         <Route path='/settings' element={<Settings />} />

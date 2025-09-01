@@ -1,24 +1,27 @@
-import React from "react";
+import React, { useState } from "react";
+import Sidebar from "../Components/Sidebar"; // <-- adjust path if needed
 
+// --- New Modal Component ---
+// This component displays the details of a single report in a modal dialog.
 const ReportDetailModal = ({ report, onClose, statusColors }) => {
   if (!report) return null;
 
+  // Handler for actions inside the modal (Approve, Reject, Delete)
   const handleAction = (action) => {
     console.log(`${action} clicked for report: ${report.id}`);
-    onClose();
+    onClose(); // Close the modal after action
   };
 
   return (
-    // Backdrop with decreased opacity
-
+    // Backdrop
     <div
       className='fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex justify-center items-center'
-      onClick={onClose}
+      onClick={onClose} // Close modal on backdrop click
     >
       {/* Modal Panel */}
       <div
         className='bg-white rounded-lg shadow-xl w-full max-w-3xl m-4'
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
       >
         {/* Modal Header */}
         <div className='flex justify-between items-start p-5 border-b rounded-t'>
@@ -93,6 +96,8 @@ const ReportDetailModal = ({ report, onClose, statusColors }) => {
           {/* Right Column: Image */}
           <div className='flex items-center justify-center bg-gray-100 rounded-lg'>
             <p className='text-gray-400'>Image</p>
+            {/* If you have an image URL, you can use an <img> tag here */}
+            {/* <img src={report.imageUrl} alt="Hazard" className="rounded-lg object-cover w-full h-full" /> */}
           </div>
         </div>
 
@@ -144,4 +149,189 @@ const ReportDetailModal = ({ report, onClose, statusColors }) => {
   );
 };
 
-export default ReportDetailModal; // Export the modal component if it's in a separate file
+const TruqieReports = () => {
+  const [currentRoute, setRoute] = useState("truqie");
+  const [selectedReport, setSelectedReport] = useState(null); // State to hold the report for the modal
+
+  // Updated mock data with descriptions and more specific locations
+  const reports = [
+    {
+      id: "HR-2024-001",
+      datetime: "2024-01-15 14:30",
+      location: "Interstate 95, Mile Marker 45, Jacksonville, FL",
+      email: "driver@truq.com",
+      hazard: "Weather",
+      vehicles: "Truck, Car",
+      status: "Pending",
+      description:
+        "Heavy fog reducing visibility to less than 50 feet. Multiple vehicles pulled over.",
+    },
+    {
+      id: "HR-2024-002",
+      datetime: "2024-01-15 09:15",
+      location: "Route 66 Junction near Amarillo, TX",
+      email: "trucker123@email.com",
+      hazard: "Debris",
+      vehicles: "Truck",
+      status: "Verified",
+      description:
+        "Large metal debris, possibly from another vehicle, is blocking the right lane.",
+    },
+    {
+      id: "HR-2024-003",
+      datetime: "2024-01-14 22:45",
+      location: "Highway 101 Bridge, Bixby Creek, CA",
+      email: "safety@transport.com",
+      hazard: "Animal Crossing",
+      vehicles: "Car, Truck, RV",
+      status: "Rejected",
+      description:
+        "Reported a deer on the road, but it was gone upon arrival. No longer a hazard.",
+    },
+    {
+      id: "HR-2024-004",
+      datetime: "2024-01-14 16:20",
+      location: "I-10 Construction Zone, Phoenix, AZ",
+      email: "fleet@logistics.com",
+      hazard: "Construction",
+      vehicles: "Truck, Car",
+      status: "Pending",
+      description: "Unmarked lane shift causing confusion and sudden braking.",
+    },
+  ];
+
+  const statusColors = {
+    Pending: "bg-gray-200 text-gray-700",
+    Verified: "bg-green-100 text-green-700",
+    Rejected: "bg-red-100 text-red-700",
+  };
+
+  const handleViewReport = (report) => {
+    setSelectedReport(report);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedReport(null);
+  };
+
+  return (
+    <div className='flex h-screen bg-gray-50'>
+      {/* Sidebar */}
+      <Sidebar currentRoute={currentRoute} setRoute={setRoute} />
+
+      {/* Main Content */}
+      <div className='flex-1 p-8 overflow-y-auto'>
+        {/* Header */}
+        <h2 className='text-lg font-semibold mb-2'>Admin Panel</h2>
+        <h1 className='text-2xl font-bold mb-1'>Truqie Reports</h1>
+        <p className='text-gray-600 mb-6'>
+          Manage and moderate truqie reports submitted by drivers
+        </p>
+
+        {/* Filters */}
+        <div className='flex flex-wrap items-center space-x-2 mb-4'>
+          <select className='border rounded px-3 py-2 text-sm'>
+            <option>All Status</option>
+            <option>Pending</option>
+            <option>Verified</option>
+            <option>Rejected</option>
+          </select>
+          <input
+            type='text'
+            placeholder='Search by location, type, or ID...'
+            className='flex-1 border rounded px-3 py-2 text-sm'
+          />
+          <button className='px-4 py-2 text-sm bg-gray-100 rounded'>
+            Clear Filters
+          </button>
+        </div>
+
+        {/* Table */}
+        <div className='bg-white shadow rounded-lg overflow-hidden'>
+          <table className='w-full text-sm'>
+            <thead className='bg-gray-100 text-gray-600 text-left'>
+              <tr>
+                <th className='px-4 py-2'>Report ID</th>
+                <th className='px-4 py-2'>Date/Time</th>
+                <th className='px-4 py-2'>Location</th>
+                <th className='px-4 py-2'>Email ID</th>
+                <th className='px-4 py-2'>Hazard Type</th>
+                <th className='px-4 py-2'>Vehicle Types</th>
+                <th className='px-4 py-2'>Status</th>
+                <th className='px-4 py-2'>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {reports.map((r) => (
+                <tr key={r.id} className='border-b last:border-none'>
+                  <td className='px-4 py-2'>{r.id}</td>
+                  <td className='px-4 py-2'>{r.datetime}</td>
+                  <td className='px-4 py-2'>{r.location}</td>
+                  <td className='px-4 py-2'>{r.email}</td>
+                  <td className='px-4 py-2 flex items-center space-x-1'>
+                    <span className='text-yellow-500'>⚠️</span>
+                    <span>{r.hazard}</span>
+                  </td>
+                  <td className='px-4 py-2'>{r.vehicles}</td>
+                  <td className='px-4 py-2'>
+                    <span
+                      className={`px-2 py-1 text-xs font-medium rounded ${
+                        statusColors[r.status]
+                      }`}
+                    >
+                      {r.status}
+                    </span>
+                  </td>
+                  <td className='px-4 py-2'>
+                    <button
+                      onClick={() => handleViewReport(r)}
+                      className='bg-teal-600 hover:bg-teal-700 text-white px-3 py-1 text-sm rounded'
+                    >
+                      View
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Status Legend */}
+        <div className='mt-6 bg-white p-4 rounded-lg shadow text-sm'>
+          <h3 className='font-semibold mb-2'>Status Legend</h3>
+          <div className='flex flex-wrap gap-4'>
+            <span>
+              <span className='px-2 py-1 bg-gray-200 rounded text-gray-700 text-xs'>
+                Pending
+              </span>{" "}
+              Awaiting review
+            </span>
+            <span>
+              <span className='px-2 py-1 bg-green-100 rounded text-green-700 text-xs'>
+                Verified
+              </span>{" "}
+              Confirmed hazard
+            </span>
+            <span>
+              <span className='px-2 py-1 bg-red-100 rounded text-red-700 text-xs'>
+                Rejected
+              </span>{" "}
+              Invalid or resolved
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Conditionally render the modal */}
+      {selectedReport && (
+        <ReportDetailModal
+          report={selectedReport}
+          onClose={handleCloseModal}
+          statusColors={statusColors}
+        />
+      )}
+    </div>
+  );
+};
+
+export default TruqieReports;

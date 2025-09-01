@@ -79,7 +79,7 @@ const Sidebar = () => {
 
   const navItems = [
     { route: "/dashboard", label: "Dashboard", icon: <DashboardIcon /> },
-    { route: "/truqie", label: "Truqie", icon: <TruqieIcon /> },
+    { route: "/truique", label: "Truique", icon: <TruqieIcon /> },
     {
       route: "/userManagement",
       label: "User Management",
