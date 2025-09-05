@@ -5,6 +5,7 @@ const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const connectDB = require("../config/db");
 const authRoutes = require("../routes/authRoutes");
+const profileRoutes = require("../routes/profileRoutes");
 
 dotenv.config();
 connectDB();
@@ -19,6 +20,14 @@ app.use(cookieParser());
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/profiles", profileRoutes);
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ message: "Internal Server Error" });
+});
+
 
 // Export instead of app.listen
 module.exports = app;
