@@ -47,36 +47,35 @@ const LoginPage = () => {
     setShowPassword(!showPassword);
   };
 
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-   
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-      setLoading(true);
-      try {
-        const res = await fetch("http://localhost:5000/api/auth/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email, password }),
-        });
+    setLoading(true);
+    try {
+      const res = await fetch("https://truq-nzas.vercel.app/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-        const data = await res.json();
+      const data = await res.json();
 
-        if (!res.ok) {
-          throw new Error(data.message || "Login failed");
-        }
-           if (data.token) {
-             localStorage.setItem("token", data.token);
-           }
-        // Redirect to dashboard if successful
-        navigate("/dashboard");
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+      if (!res.ok) {
+        throw new Error(data.message || "Login failed");
       }
-    };
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+      }
+      // Redirect to dashboard if successful
+      navigate("/dashboard");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className='bg-gray-100 flex items-center justify-center min-h-screen font-sans'>

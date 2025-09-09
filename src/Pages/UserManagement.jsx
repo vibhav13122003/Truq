@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "../Components/Sidebar";
 
-
-
-
 const UserTypeBadge = ({ type }) => (
   <span
     className={`px-2 py-0.5 text-xs font-medium rounded-full ${
@@ -27,7 +24,7 @@ const UserDetailsModal = ({
 
   // Reusable component for displaying details exactly as in the screenshot
   const DetailItem = ({ text }) => (
-    <p className="text-sm text-gray-700">{text}</p>
+    <p className='text-sm text-gray-700'>{text}</p>
   );
 
   return (
@@ -255,7 +252,6 @@ const UserDetailsModal = ({
   );
 };
 
-
 const UserManagementPage = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -263,47 +259,64 @@ const UserManagementPage = () => {
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [profileLoading, setProfileLoading] = useState(false);
   const [currentRoute, setRoute] = useState("userManagement");
-  
+
   const mockReports = [
-      {id: 1, title: 'Rest Stop - Highway 95', description: 'Reported parking availability and facilities', date: 'July 18, 2024', isRecent: true},
-      {id: 2, title: 'Fuel Station - I-40', description: 'Updated fuel prices and truck amenities', date: 'July 15, 2024', isRecent: true},
-      {id: 3, title: 'Weight Station - Route 66', description: 'Long wait times reported', date: 'June 28, 2024', isRecent: false},
+    {
+      id: 1,
+      title: "Rest Stop - Highway 95",
+      description: "Reported parking availability and facilities",
+      date: "July 18, 2024",
+      isRecent: true,
+    },
+    {
+      id: 2,
+      title: "Fuel Station - I-40",
+      description: "Updated fuel prices and truck amenities",
+      date: "July 15, 2024",
+      isRecent: true,
+    },
+    {
+      id: 3,
+      title: "Weight Station - Route 66",
+      description: "Long wait times reported",
+      date: "June 28, 2024",
+      isRecent: false,
+    },
   ];
- useEffect(() => {
-   const fetchUsers = async () => {
-     try {
-       const res = await fetch("http://localhost:5000/api/auth/users");
-       if (!res.ok) throw new Error(`Error: ${res.status}`);
-       const data = await res.json();
-       setUsers(Array.isArray(data) ? data : []);
-     } catch (err) {
-       console.error("Error fetching users:", err);
-       setUsers([]);
-     } finally {
-       setLoading(false);
-     }
-   };
-   fetchUsers();
- }, []);
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const res = await fetch("https://truq-nzas.vercel.app/api/auth/users");
+        if (!res.ok) throw new Error(`Error: ${res.status}`);
+        const data = await res.json();
+        setUsers(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("Error fetching users:", err);
+        setUsers([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUsers();
+  }, []);
 
- const fetchUserProfile = async (user) => {
-   setSelectedUser(user);
-   setProfileLoading(true);
-   try {
-     const res = await fetch(
-       `http://localhost:5000/api/profiles/user/${user._id}`
-     );
-     if (!res.ok) throw new Error("Profile not found");
-     const profiles = await res.json();
-     setSelectedProfile(profiles);
-   } catch (err) {
-     console.error("Error fetching profile:", err);
-     setSelectedProfile([]);
-   } finally {
-     setProfileLoading(false);
-   }
- };
-
+  const fetchUserProfile = async (user) => {
+    setSelectedUser(user);
+    setProfileLoading(true);
+    try {
+      const res = await fetch(
+        `https://truq-nzas.vercel.app/api/profiles/user/${user._id}`
+      );
+      if (!res.ok) throw new Error("Profile not found");
+      const profiles = await res.json();
+      setSelectedProfile(profiles);
+    } catch (err) {
+      console.error("Error fetching profile:", err);
+      setSelectedProfile([]);
+    } finally {
+      setProfileLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -378,4 +391,3 @@ const UserManagementPage = () => {
 };
 
 export default UserManagementPage;
-
