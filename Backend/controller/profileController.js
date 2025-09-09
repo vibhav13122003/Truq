@@ -1,21 +1,18 @@
 // Import the Profile model from your truckingModels.js file
 const { Profile } = require('../model/TruqProfile.js');
 const mongoose = require('mongoose');
-
+const User = require('../model/User');
 
 const createProfile = async (req, res) => {
     try {
         const { profileName, vehicle, isArticulated, trailers } = req.body;
 
-      
-        const userId = "68b8448c1c82242e11d951c6";
-
         const newProfile = new Profile({
             profileName,
             vehicle,
             isArticulated,
-            trailers: trailers || [], // Can create a profile with or without trailers initially
-            user: userId,
+            trailers: trailers || [],
+            user: req.user.id,   // dynamic user
         });
 
         const savedProfile = await newProfile.save();
@@ -25,11 +22,10 @@ const createProfile = async (req, res) => {
     }
 };
 
-
 const getMyProfiles = async (req, res) => {
     try {
         const profiles = await Profile.find({ user: req.user.id });
-        if (!profiles) {
+        if (!profiles || profiles.length === 0) {
             return res.status(404).json({ message: 'No profiles found for this user.' });
         }
         res.status(200).json(profiles);
@@ -50,14 +46,13 @@ const getProfileById = async (req, res) => {
     }
 };
 
-
 const updateProfile = async (req, res) => {
     try {
         const { profileName, vehicle, isArticulated } = req.body;
         const profile = await Profile.findOneAndUpdate(
-            { _id: req.params.profileId, user: req.user.id }, // Ensure user owns this profile
+            { _id: req.params.profileId, user: req.user.id },
             { $set: { profileName, vehicle, isArticulated } },
-            { new: true, runValidators: true } // Return the updated doc and run schema validators
+            { new: true, runValidators: true }
         );
 
         if (!profile) {
@@ -69,10 +64,6 @@ const updateProfile = async (req, res) => {
     }
 };
 
-/**
- * @description Delete a profile
- * @route       DELETE /api/profiles/:profileId
- */
 const deleteProfile = async (req, res) => {
     try {
         const profile = await Profile.findOneAndDelete({
@@ -89,17 +80,14 @@ const deleteProfile = async (req, res) => {
     }
 };
 
-
-
 const addTrailer = async (req, res) => {
     try {
-        const profile = await Profile.findOne({ _id: req.params.profileId, user: '68b8448c1c82242e11d951c6'});
+        const profile = await Profile.findOne({ _id: req.params.profileId, user: req.user.id });
 
         if (!profile) {
             return res.status(404).json({ message: 'Profile not found or user not authorized.' });
         }
 
-        // req.body should contain the new trailer's data
         const newTrailer = req.body;
         profile.trailers.push(newTrailer);
 
@@ -115,18 +103,13 @@ const updateTrailer = async (req, res) => {
         const { profileId, trailerId } = req.params;
         const updatedTrailerData = req.body;
 
-        // Create an object to set the fields of the embedded document
         const updateFields = {};
         for (const key in updatedTrailerData) {
             updateFields[`trailers.$.${key}`] = updatedTrailerData[key];
         }
 
         const updatedProfile = await Profile.findOneAndUpdate(
-            {
-                _id: profileId,
-                user: req.user.id,
-                'trailers._id': trailerId
-            },
+            { _id: profileId, user: req.user.id, 'trailers._id': trailerId },
             { $set: updateFields },
             { new: true, runValidators: true }
         );
@@ -145,22 +128,19 @@ const deleteTrailer = async (req, res) => {
     try {
         const { profileId, trailerId } = req.params;
 
-        // 1. Fetch original profile first
-        const originalProfile = await Profile.findOne({ _id: profileId, user: '68b8448c1c82242e11d951c6' });
+        const originalProfile = await Profile.findOne({ _id: profileId, user: req.user.id });
         if (!originalProfile) {
             return res.status(404).json({ message: 'Profile not found or user not authorized.' });
         }
 
         const originalLength = originalProfile.trailers.length;
 
-        // 2. Perform deletion
         const updatedProfile = await Profile.findOneAndUpdate(
-            { _id: profileId, user: '68b8448c1c82242e11d951c6' },
+            { _id: profileId, user: req.user.id },
             { $pull: { trailers: { _id: trailerId } } },
             { new: true }
         );
 
-        // 3. Check if something was removed
         if (updatedProfile.trailers.length === originalLength) {
             return res.status(404).json({ message: 'Trailer not found in this profile.' });
         }
@@ -171,8 +151,31 @@ const deleteTrailer = async (req, res) => {
     }
 };
 
+// profileController.js
+const getProfilesByUserId = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        // find user first
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        // then query profile by email (if profile.user stores email)
+        const profiles = await Profile.find({ user: user._id });
+
+        if (!profiles || profiles.length === 0) {
+            return res.status(404).json({ message: "No profiles found for this user." });
+        }
+
+        res.status(200).json(profiles);
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching profiles", error: error.message });
+    }
+};
+
 
 module.exports = {
+    getProfilesByUserId,
     createProfile,
     getMyProfiles,
     getProfileById,

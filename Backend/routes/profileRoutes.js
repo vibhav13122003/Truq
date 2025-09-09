@@ -7,26 +7,22 @@ const {
     deleteProfile,
     addTrailer,
     updateTrailer,
-    deleteTrailer
+    deleteTrailer,
+    getProfilesByUserId
 } = require("../controller/profileController");
 
 const router = express.Router();
 
-// Profile routes
-router.route("/")
-    .get(getMyProfiles)    // ✅ corrected here
-    .post(createProfile);
+const { protect } = require("../middleware/authMiddleware");
 
-router.route("/:profileId")
-    .get(getProfileById)
-    .put(updateProfile)
-    .delete(deleteProfile);
-
-router.route("/:profileId/trailers")
-    .post(addTrailer);
-
-router.route("/:profileId/trailers/:trailerId")
-    .put(updateTrailer)
-    .delete(deleteTrailer); // ✅ also include delete for trailers
+router.post("/", createProfile);
+router.get("/", getMyProfiles);
+router.get("/profiles/:profileId", protect, getProfileById);
+router.put("/profiles/:profileId", protect, updateProfile);
+router.delete("/profiles/:profileId", protect, deleteProfile);
+router.post("/profiles/:profileId/trailers", protect, addTrailer);
+router.put("/profiles/:profileId/trailers/:trailerId", protect, updateTrailer);
+router.delete("/profiles/:profileId/trailers/:trailerId", protect, deleteTrailer);
+router.get("/user/:userId", getProfilesByUserId);
 
 module.exports = router;

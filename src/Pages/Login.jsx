@@ -1,10 +1,5 @@
 import React, { useState } from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  useNavigate,
-} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 // --- SVG icon components ---
 const EyeIcon = () => (
@@ -39,19 +34,49 @@ const EyeOffIcon = () => (
   </svg>
 );
 
-// --- Login Page ---
- export default function Login() {
-  const [showPassword, setShowPassword] = useState(false);
+// --- Login Page Component ---
+const LoginPage = () => {
   const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    navigate("/dashboard"); // Redirect to dashboard
-  };
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+   
+
+      setLoading(true);
+      try {
+        const res = await fetch("http://localhost:5000/api/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.message || "Login failed");
+        }
+           if (data.token) {
+             localStorage.setItem("token", data.token);
+           }
+        // Redirect to dashboard if successful
+        navigate("/dashboard");
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
   return (
     <div className='bg-gray-100 flex items-center justify-center min-h-screen font-sans'>
@@ -64,7 +89,15 @@ const EyeOffIcon = () => (
         </div>
 
         <div className='bg-white rounded-lg shadow-lg p-8'>
-          <form onSubmit={handleLogin}>
+          <form onSubmit={handleSubmit}>
+            {error && (
+              <div
+                className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-4'
+                role='alert'
+              >
+                <span className='block sm:inline'>{error}</span>
+              </div>
+            )}
             <div className='mb-6'>
               <label
                 htmlFor='email'
@@ -76,8 +109,11 @@ const EyeOffIcon = () => (
                 type='email'
                 id='email'
                 name='email'
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder='Enter your email address'
                 className='w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-teal-700 focus:border-transparent transition'
+                required
               />
             </div>
 
@@ -93,8 +129,11 @@ const EyeOffIcon = () => (
                   type={showPassword ? "text" : "password"}
                   id='password'
                   name='password'
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder='Enter your password'
                   className='w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-teal-700 focus:border-transparent transition'
+                  required
                 />
                 <button
                   type='button'
@@ -114,9 +153,10 @@ const EyeOffIcon = () => (
 
             <button
               type='submit'
-              className='w-full bg-teal-700 text-white font-bold py-3 px-4 rounded-lg hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-700 transition duration-300'
+              disabled={loading}
+              className='w-full bg-teal-700 text-white font-bold py-3 px-4 rounded-lg hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-700 transition duration-300 disabled:bg-teal-400 disabled:cursor-not-allowed'
             >
-              Login
+              {loading ? "Logging in..." : "Login"}
             </button>
           </form>
         </div>
@@ -129,4 +169,6 @@ const EyeOffIcon = () => (
       </div>
     </div>
   );
-}
+};
+
+export default LoginPage;

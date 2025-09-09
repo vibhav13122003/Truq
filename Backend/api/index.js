@@ -14,7 +14,23 @@ const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+
+const corsOptions = {
+    // Setting origin to 'true' reflects the request origin.
+    // This is a flexible way to allow any origin to make credentialed requests,
+    // effectively allowing all origins for this configuration.
+    origin: true,
+    // This is essential for sending cookies or authorization headers.
+    credentials: true,
+    // Explicitly allow the methods your frontend will use.
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    // Explicitly allow the headers your frontend sends.
+    allowedHeaders: 'Content-Type,Authorization',
+};
+
+// Use the configured CORS options
+app.use(cors(corsOptions));
+// ... existing code ...
 app.use(morgan("dev"));
 app.use(cookieParser());
 

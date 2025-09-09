@@ -23,7 +23,7 @@ const EmbeddedTrailerSchema = new Schema({
         required: [true, 'Number of trailer axles is required.'],
         min: 0
     },
-    // Boolean to track if the trailer is currently carrying a load.
+   
     isLaden: {
         type: Boolean,
         default: false
@@ -40,7 +40,7 @@ const ProfileSchema = new Schema({
    
     user: {
         type: Schema.Types.ObjectId,
-        ref: 'User', // The model name you used when creating the User model
+        ref: 'User', 
         required: true,
      
     },
@@ -62,9 +62,8 @@ const ProfileSchema = new Schema({
     timestamps: true
 });
 
-// Create the model from the schema
 const Profile = mongoose.model('Profile', ProfileSchema);
 
 
-module.exports = { Profile };
+module.exports = {Profile};
 

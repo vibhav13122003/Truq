@@ -1,41 +1,9 @@
-import React, { useState } from "react";
-import Sidebar from "../Components/Sidebar"; // ⬅️ Import your existing Sidebar component
+import React, { useState, useEffect } from "react";
+import Sidebar from "../Components/Sidebar";
 
-// --- Icon Components ---
-const CloseIcon = () => (
-  <svg
-    className='w-6 h-6'
-    fill='none'
-    stroke='currentColor'
-    viewBox='0 0 24 24'
-    xmlns='http://www.w3.org/2000/svg'
-  >
-    <path
-      strokeLinecap='round'
-      strokeLinejoin='round'
-      strokeWidth={2}
-      d='M6 18L18 6M6 6l12 12'
-    />
-  </svg>
-);
-const ClockIcon = () => (
-  <svg
-    className='w-4 h-4 mr-1.5 text-gray-500'
-    fill='none'
-    stroke='currentColor'
-    viewBox='0 0 24 24'
-    xmlns='http://www.w3.org/2000/svg'
-  >
-    <path
-      strokeLinecap='round'
-      strokeLinejoin='round'
-      strokeWidth={2}
-      d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'
-    />
-  </svg>
-);
 
-// --- Reusable Components ---
+
+
 const UserTypeBadge = ({ type }) => (
   <span
     className={`px-2 py-0.5 text-xs font-medium rounded-full ${
@@ -48,377 +16,338 @@ const UserTypeBadge = ({ type }) => (
   </span>
 );
 
-const StatusBadge = ({ status, small = false }) => {
-  let classes = small ? "px-2 py-0.5 text-xs" : "px-3 py-1 text-sm";
-  let statusClass = "";
-
-  switch (status.toLowerCase()) {
-    case "active":
-      statusClass = "bg-green-100 text-green-700";
-      break;
-    case "pending":
-    case "pending review":
-      statusClass = "bg-yellow-100 text-yellow-700";
-      break;
-    case "verified":
-      statusClass = "bg-blue-100 text-blue-700";
-      break;
-    default:
-      statusClass = "bg-gray-100 text-gray-700";
-  }
-
-  return (
-    <span
-      className={`font-semibold rounded-full inline-block ${classes} ${statusClass}`}
-    >
-      {status}
-    </span>
-  );
-};
-
-// --- Modal Component ---
-const UserDetailsModal = ({ user, onClose }) => {
+const UserDetailsModal = ({
+  user,
+  profile,
+  reports = [],
+  onClose,
+  loading,
+}) => {
   if (!user) return null;
 
-  
-  // Dummy data
-  const vehicles = [
-    {
-      name: "Freightliner Cascadia",
-      plate: "TRQ-1234",
-      regDate: "Jan 15, 2024",
-      year: 2020,
-      vin: "1FJU...7890",
-      status: "Active",
-    },
-    {
-      name: "Peterbilt 579",
-      plate: "TRQ-5678",
-      regDate: "Feb 20, 2024",
-      year: 2019,
-      vin: "1XPBD...4567",
-      status: "Active",
-    },
-    {
-      name: "Kenworth T680",
-      plate: "TRQ-9012",
-      regDate: "Mar 10, 2024",
-      year: 2021,
-      vin: "1XKW...8901",
-      status: "Pending",
-    },
-  ];
-
-  const reports = [
-    {
-      title: "Rest Stop - Highway 95",
-      date: "July 18, 2024",
-      details: "Reported parking availability and facilities",
-      status: "Verified",
-    },
-    {
-      title: "Fuel Station - I-40",
-      date: "July 15, 2024",
-      details: "Updated fuel prices and truck amenities",
-      status: "Verified",
-    },
-    {
-      title: "Parking Area - Route 66",
-      date: "July 12, 2024",
-      details: "Reported new overnight parking spot",
-      status: "Pending Review",
-    },
-  ];
+  // Reusable component for displaying details exactly as in the screenshot
+  const DetailItem = ({ text }) => (
+    <p className="text-sm text-gray-700">{text}</p>
+  );
 
   return (
-    <div
-      className='fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex justify-center items-center'
-      onClick={onClose}
-    >
-      <div className='bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto'>
-        <div className='p-6 border-b sticky top-0 bg-white z-10'>
-          <div className='flex justify-between items-center'>
-            <h2 className='text-xl font-bold text-gray-800'>User Details</h2>
-            <button
-              onClick={onClose}
-              className='text-gray-500 hover:text-gray-800'
-            >
-              <CloseIcon />
-            </button>
-          </div>
-        </div>
-
-        <div className='p-8 space-y-8'>
-          {/* Basic Info */}
-          <section>
-            <h3 className='text-lg font-semibold text-gray-700 mb-4 border-b pb-2'>
-              Basic Information
-            </h3>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm'>
-              <div>
-                <span className='font-medium text-gray-500'>Name</span>
-                <p className='text-gray-800'>{user.name}</p>
-              </div>
-              <div>
-                <span className='font-medium text-gray-500'>Email</span>
-                <p className='text-gray-800'>{user.email}</p>
-              </div>
-              <div>
-                <span className='font-medium text-gray-500'>Phone</span>
-                <p className='text-gray-800'>{user.phone}</p>
-              </div>
-              <div>
-                <span className='font-medium text-gray-500'>User Type</span>
-                <p>
-                  <UserTypeBadge type={user.type} />
-                </p>
-              </div>
-            </div>
-          </section>
-
-          {/* Subscription Info */}
-          <section>
-            <h3 className='text-lg font-semibold text-gray-700 mb-4 border-b pb-2'>
-              Subscription Information
-            </h3>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm'>
-              <div>
-                <span className='font-medium text-gray-500'>Status</span>
-                <p>
-                  <StatusBadge status='Active' small />
-                </p>
-              </div>
-              <div>
-                <span className='font-medium text-gray-500'>Joined On</span>
-                <p className='text-gray-800'>{user.joined}</p>
-              </div>
-            </div>
-          </section>
-
-          {/* Registered Vehicles */}
-          <section>
-            <h3 className='text-lg font-semibold text-gray-700 mb-4 border-b pb-2'>
-              Registered Vehicles
-            </h3>
-            <div className='bg-gray-50 p-4 rounded-md mb-4 flex justify-between items-center text-sm'>
-              <div>
-                <span className='font-medium text-gray-500'>
-                  Total Vehicles
-                </span>
-                <p className='text-gray-800 font-bold text-lg'>3</p>
-              </div>
-              <div>
-                <span className='font-medium text-gray-500'>
-                  Registration Status
-                </span>
-                <p className='text-green-600 font-semibold'>Verified</p>
-              </div>
-            </div>
-            <div className='space-y-4'>
-              {vehicles.map((v, i) => (
-                <div
-                  key={i}
-                  className='bg-white border border-gray-200 p-4 rounded-md grid grid-cols-1 md:grid-cols-3 gap-4 text-sm'
-                >
-                  <div>
-                    <p className='font-bold text-gray-800'>{v.name}</p>
-                    <p className='text-gray-500'>
-                      License Plate:{" "}
-                      <span className='text-gray-700'>{v.plate}</span>
-                    </p>
-                    <p className='text-gray-500'>
-                      Reg. Date:{" "}
-                      <span className='text-gray-700'>{v.regDate}</span>
-                    </p>
-                  </div>
-                  <div>
-                    <p className='text-gray-500'>
-                      Year: <span className='text-gray-700'>{v.year}</span>
-                    </p>
-                    <p className='text-gray-500'>
-                      VIN: <span className='text-gray-700'>{v.vin}</span>
-                    </p>
-                  </div>
-                  <div className='flex items-start justify-end'>
-                    <StatusBadge status={v.status} small />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Reports */}
-          <section>
-            <h3 className='text-lg font-semibold text-gray-700 mb-4 border-b pb-2'>
-              User Submitted Reports
-            </h3>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 text-sm'>
-              <div className='bg-gray-50 p-4 rounded-md'>
-                <span className='font-medium text-gray-500'>
-                  Recent Reports Submitted
-                </span>
-                <p className='text-gray-800 font-bold text-2xl'>
-                  3 <span className='text-sm font-normal'>This Month</span>
-                </p>
-              </div>
-              <div className='bg-gray-50 p-4 rounded-md'>
-                <span className='font-medium text-gray-500'>Total Reports</span>
-                <p className='text-gray-800 font-bold text-2xl'>23</p>
-              </div>
-            </div>
-            <div className='flex justify-between items-center mb-2'>
-              <h4 className='font-semibold text-gray-600'>Latest Reports</h4>
-              <button className='text-sm text-teal-600 font-semibold hover:underline'>
-                View All
-              </button>
-            </div>
-            <div className='space-y-3'>
-              {reports.map((r, i) => (
-                <div
-                  key={i}
-                  className='bg-white border border-gray-200 p-4 rounded-md'
-                >
-                  <div className='flex justify-between items-start'>
-                    <div>
-                      <p className='font-semibold text-gray-800'>{r.title}</p>
-                      <p className='text-sm text-gray-600 mt-1'>{r.details}</p>
-                      <p className='text-xs text-gray-500 mt-2 flex items-center'>
-                        <ClockIcon /> {r.date}
-                      </p>
-                    </div>
-                    <StatusBadge status={r.status} small />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        </div>
-
-        <div className='p-6 border-t sticky bottom-0 bg-gray-50 z-10 text-right'>
+    <div className='fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex justify-center items-center p-4'>
+      <div className='bg-white w-full max-w-3xl max-h-[95vh] overflow-y-auto rounded-xl shadow-lg'>
+        {/* Modal Header */}
+        <div className='sticky top-0 bg-white z-10 flex justify-between items-center border-b p-6'>
+          <h2 className='text-xl font-semibold text-gray-800'>User Details</h2>
           <button
             onClick={onClose}
-            className='px-6 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 text-sm font-semibold'
+            className='text-gray-400 hover:text-gray-700 text-2xl leading-none'
           >
-            Close
+            &times;
           </button>
+        </div>
+
+        <div className='p-6 space-y-8'>
+          {/* Basic Information Section */}
+          <section>
+            <h3 className='text-base font-semibold text-gray-800 mb-4'>
+              Basic Information
+            </h3>
+            <div className='grid grid-cols-2 gap-x-8 gap-y-4'>
+              <div>
+                <p className='text-sm text-gray-500'>Username</p>
+                <p className='text-base font-medium text-gray-800'>
+                  {user.name}
+                </p>
+              </div>
+              <div>
+                <p className='text-sm text-gray-500'>Email</p>
+                <p className='text-base font-medium text-gray-800'>
+                  {user.email}
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* Subscription Information Section */}
+          <section>
+            <h3 className='text-base font-semibold text-gray-800 mb-4'>
+              Subscription Information
+            </h3>
+            <div className='grid grid-cols-2 gap-x-8 gap-y-4 items-start'>
+              <div>
+                <p className='text-sm text-gray-500'>Status</p>
+                <span className='inline-flex items-center px-2.5 py-0.5 mt-0.5 rounded-md bg-green-100 text-green-700 text-sm font-medium'>
+                  Active
+                </span>
+              </div>
+              <div>
+                <p className='text-sm text-gray-500'>Joined On</p>
+                <p className='text-base font-medium text-gray-800'>
+                  {new Date(user.createdAt).toLocaleDateString("en-CA")}
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* truq Profiles Section */}
+          <section>
+            <h3 className='text-base font-semibold text-gray-800 mb-4'>
+              truq Profiles
+            </h3>
+            {loading ? (
+              <p className='text-gray-500 mt-2'>Loading profiles...</p>
+            ) : profile && profile.length > 0 ? (
+              <div className='bg-gray-50 border rounded-lg p-4 space-y-4'>
+                <p className='text-sm text-gray-600 font-medium'>
+                  Total truq Profiles: {profile.length}
+                </p>
+                {profile.map((p) => (
+                  <div
+                    key={p._id}
+                    className='border rounded-lg p-4 shadow-sm bg-white'
+                  >
+                    <div className='flex justify-between items-start mb-4'>
+                      <h4 className='font-semibold text-gray-800'>
+                        {p.profileName}
+                      </h4>
+                      <span className='inline-flex items-center px-2.5 py-0.5 rounded-md bg-green-100 text-green-700 text-sm font-medium'>
+                        Active
+                      </span>
+                    </div>
+
+                    <div className='flex justify-between'>
+                      {/* Left Column */}
+                      <div className='space-y-2'>
+                        <DetailItem text={`Vehicle Type :${p.vehicle.type}`} />
+                        <DetailItem text={`Height (m):${p.vehicle.height_m}`} />
+                        <DetailItem text={`Width (m):${p.vehicle.width_m}`} />
+                        <DetailItem text={`Axles :${p.vehicle.axles}`} />
+                        <DetailItem
+                          text={`Articulated : ${
+                            p.isArticulated ? "Yes" : "No"
+                          }`}
+                        />
+                      </div>
+
+                      {/* Middle Column with Avatar */}
+
+                      {/* Right Column */}
+                      <div className='space-y-2 text-sm'>
+                        <DetailItem text={`Profile Name :${p.profileName}`} />
+                        <DetailItem text={`Length (m):${p.vehicle.length_m}`} />
+                        <DetailItem
+                          text={`Weight (kg):${p.vehicle.weight_kg}`}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Trailer Information - only shown if articulated */}
+                    {p.isArticulated &&
+                      p.trailers &&
+                      p.trailers.length > 0 &&
+                      p.trailers.map((trailer, index) => (
+                        <div
+                          key={trailer._id || index}
+                          className='mt-4 pt-4 border-t border-dashed'
+                        >
+                          <div className='grid grid-cols-2 gap-x-12'>
+                            <div className='space-y-2'>
+                              <DetailItem
+                                text={`Trailer Number :${index + 1}`}
+                              />
+                              <DetailItem
+                                text={`Height (m):${trailer.height_m}`}
+                              />
+                              <DetailItem
+                                text={`Width (m):${trailer.width_m}`}
+                              />
+                              <DetailItem
+                                text={`Laden :${
+                                  trailer.isLaden ? "Yes" : "No"
+                                }`}
+                              />
+                            </div>
+                            <div className='space-y-2'>
+                              <DetailItem
+                                text={`Length (m):${trailer.length_m}`}
+                              />
+                              <DetailItem
+                                text={`Weight (kg):${trailer.weight_kg}`}
+                              />
+                              <DetailItem text={`Axles :${trailer.axles}`} />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className='text-gray-500 mt-2'>No profiles found.</p>
+            )}
+          </section>
+
+          {/* User Submitted Reports Section */}
+          <section>
+            <h3 className='text-base font-semibold text-gray-800 mb-4'>
+              User Submitted Reports
+            </h3>
+            <div className='flex justify-between items-center mb-4'>
+              <p className='text-gray-600 text-sm'>Recent Reports Submitted</p>
+              <span className='text-blue-600 bg-blue-100 text-xs font-semibold cursor-pointer px-2 py-1 rounded'>
+                {reports.length} Reports
+              </span>
+            </div>
+            <div className='grid grid-cols-2 gap-4 mb-6'>
+              <div className='p-4 bg-gray-50 border rounded-lg text-center'>
+                <p className='text-2xl font-bold text-gray-900'>
+                  {reports.filter((r) => r.isRecent).length}
+                </p>
+                <p className='text-sm text-gray-600'>This Month</p>
+              </div>
+              <div className='p-4 bg-gray-50 border rounded-lg text-center'>
+                <p className='text-2xl font-bold text-gray-900'>
+                  {reports.length}
+                </p>
+                <p className='text-sm text-gray-600'>Total Reports</p>
+              </div>
+            </div>
+
+            <div className='flex justify-between items-center mb-3'>
+              <h4 className='text-gray-700 font-medium'>Latest Reports</h4>
+              <span className='text-red-600 text-sm font-medium cursor-pointer'>
+                View All
+              </span>
+            </div>
+
+            <div className='space-y-3'>
+              {reports.slice(0, 2).map((r) => (
+                <div key={r.id} className='border p-4 rounded-lg bg-gray-50'>
+                  <div className='flex justify-between items-start'>
+                    <p className='font-semibold text-gray-800'>{r.title}</p>
+                    <span className='inline-flex items-center px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-medium'>
+                      Verified
+                    </span>
+                  </div>
+                  <p className='text-gray-600 text-sm my-1'>{r.description}</p>
+                  <div className='flex items-center text-xs text-gray-500 mt-2'>
+                    <svg
+                      className='w-4 h-4 mr-1.5 text-gray-400'
+                      fill='none'
+                      stroke='currentColor'
+                      viewBox='0 0 24 24'
+                      xmlns='http://www.w3.org/2000/svg'
+                    >
+                      <path
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        strokeWidth='2'
+                        d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'
+                      ></path>
+                    </svg>
+                    {r.date}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
         </div>
       </div>
     </div>
   );
 };
 
-// --- Main Page with Sidebar ---
-const UserManagementPage = () => {
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [currentRoute, setRoute] = useState("userManagement");
 
-  const users = [
-    {
-      name: "John Smith",
-      email: "john.smith@email.com",
-      phone: "+1 555-0123",
-      type: "Paid",
-      joined: "2024-01-15",
-    },
-    {
-      name: "Sarah Johnson",
-      email: "sarah.j@email.com",
-      phone: "+1 555-0124",
-      type: "Free",
-      joined: "2024-02-20",
-    },
-    {
-      name: "Mike Davis",
-      email: "mike.davis@email.com",
-      phone: "+1 555-0125",
-      type: "Paid",
-      joined: "2024-03-10",
-    },
-    {
-      name: "Emily Wilson",
-      email: "emily.w@email.com",
-      phone: "+1 555-0126",
-      type: "Free",
-      joined: "2024-04-05",
-    },
-    {
-      name: "Robert Brown",
-      email: "robert.brown@email.com",
-      phone: "+1 555-0127",
-      type: "Paid",
-      joined: "2024-05-12",
-    },
-    {
-      name: "Lisa Anderson",
-      email: "lisa.anderson@email.com",
-      phone: "+1 555-0128",
-      type: "Free",
-      joined: "2024-06-08",
-    },
+const UserManagementPage = () => {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedProfile, setSelectedProfile] = useState(null);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [currentRoute, setRoute] = useState("userManagement");
+  
+  const mockReports = [
+      {id: 1, title: 'Rest Stop - Highway 95', description: 'Reported parking availability and facilities', date: 'July 18, 2024', isRecent: true},
+      {id: 2, title: 'Fuel Station - I-40', description: 'Updated fuel prices and truck amenities', date: 'July 15, 2024', isRecent: true},
+      {id: 3, title: 'Weight Station - Route 66', description: 'Long wait times reported', date: 'June 28, 2024', isRecent: false},
   ];
+ useEffect(() => {
+   const fetchUsers = async () => {
+     try {
+       const res = await fetch("http://localhost:5000/api/auth/users");
+       if (!res.ok) throw new Error(`Error: ${res.status}`);
+       const data = await res.json();
+       setUsers(Array.isArray(data) ? data : []);
+     } catch (err) {
+       console.error("Error fetching users:", err);
+       setUsers([]);
+     } finally {
+       setLoading(false);
+     }
+   };
+   fetchUsers();
+ }, []);
+
+ const fetchUserProfile = async (user) => {
+   setSelectedUser(user);
+   setProfileLoading(true);
+   try {
+     const res = await fetch(
+       `http://localhost:5000/api/profiles/user/${user._id}`
+     );
+     if (!res.ok) throw new Error("Profile not found");
+     const profiles = await res.json();
+     setSelectedProfile(profiles);
+   } catch (err) {
+     console.error("Error fetching profile:", err);
+     setSelectedProfile([]);
+   } finally {
+     setProfileLoading(false);
+   }
+ };
+
+
+  if (loading) {
+    return (
+      <div className='flex h-screen bg-gray-50'>
+        <Sidebar currentRoute={currentRoute} setRoute={setRoute} />
+        <div className='flex-1 p-8 text-center'>Loading...</div>
+      </div>
+    );
+  }
 
   return (
-    <div className='flex h-screen bg-gray-50'>
-      {/* Sidebar */}
+    <div className='flex h-screen bg-gray-50 font-sans'>
       <Sidebar currentRoute={currentRoute} setRoute={setRoute} />
-
-      {/* Main Content */}
       <div className='flex-1 p-8 overflow-y-auto'>
         <h1 className='text-3xl font-bold text-gray-800 mb-1'>
           User Management
         </h1>
         <p className='text-gray-600 mb-6'>Manage and monitor user accounts</p>
 
-        {/* Filters */}
-        <div className='flex flex-wrap items-center gap-4 mb-6'>
-          <select className='border border-gray-300 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500'>
-            <option>All Status</option>
-            <option>Active</option>
-            <option>Inactive</option>
-          </select>
-          <select className='border border-gray-300 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-500'>
-            <option>All User Types</option>
-            <option>Free</option>
-            <option>Paid</option>
-          </select>
-          <input
-            type='text'
-            placeholder='Search by name, email, or phone...'
-            className='flex-1 border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 min-w-[250px]'
-          />
-          <button className='px-4 py-2 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300'>
-            Clear Filters
-          </button>
-        </div>
-
-        {/* Table */}
         <div className='bg-white shadow rounded-lg overflow-x-auto'>
           <table className='w-full text-left text-sm'>
             <thead className='bg-gray-50 text-gray-600 uppercase text-xs'>
               <tr>
                 <th className='p-4 font-semibold'>Name</th>
-                <th className='p-4 font-semibold'>Email / Phone</th>
+                <th className='p-4 font-semibold'>Email</th>
                 <th className='p-4 font-semibold'>User Type</th>
                 <th className='p-4 font-semibold'>Joined On</th>
                 <th className='p-4 font-semibold'>Actions</th>
               </tr>
             </thead>
             <tbody className='divide-y divide-gray-200'>
-              {users.map((user, idx) => (
-                <tr key={idx} className='hover:bg-gray-50'>
+              {users.map((user) => (
+                <tr key={user._id} className='hover:bg-gray-50'>
                   <td className='p-4 font-medium text-gray-900'>{user.name}</td>
-                  <td className='p-4 text-gray-700'>
-                    {user.email}
-                    <br />
-                    <span className='text-gray-500 text-xs'>{user.phone}</span>
-                  </td>
+                  <td className='p-4 text-gray-700'>{user.email}</td>
                   <td className='p-4'>
-                    <UserTypeBadge type={user.type} />
+                    <UserTypeBadge type={user.isPaid ? "Paid" : "Free"} />
                   </td>
-                  <td className='p-4 text-gray-700'>{user.joined}</td>
+                  <td className='p-4 text-gray-700'>
+                    {new Date(user.createdAt).toLocaleDateString()}
+                  </td>
                   <td className='p-4'>
                     <button
-                      onClick={() => setSelectedUser(user)}
+                      onClick={() => fetchUserProfile(user)}
                       className='px-4 py-1.5 bg-teal-600 text-white rounded-md text-xs font-bold hover:bg-teal-700 transition'
                     >
                       View
@@ -429,15 +358,24 @@ const UserManagementPage = () => {
             </tbody>
           </table>
         </div>
+      </div>
 
-        {/* Modal */}
+      {/* Modal */}
+      {selectedUser && (
         <UserDetailsModal
           user={selectedUser}
-          onClose={() => setSelectedUser(null)}
+          profile={selectedProfile}
+          reports={mockReports}
+          loading={profileLoading}
+          onClose={() => {
+            setSelectedUser(null);
+            setSelectedProfile(null);
+          }}
         />
-      </div>
+      )}
     </div>
   );
 };
 
 export default UserManagementPage;
+
