@@ -4,8 +4,8 @@ const router = express.Router();
 
 router.post("/register", register);
 router.post("/login", login);
-router.get("/verify/:token", verifyEmail);
+router.post("/verifymail", verifyEmail);
 router.post("/forgot-password", forgotPassword);
-router.post("/reset/:token", resetPassword);
+router.post("/reset-otp", resetPassword);
 router.get("/users", getAllUsers);
 module.exports = router;

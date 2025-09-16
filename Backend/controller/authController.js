@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const sendEmail = require("../utils/sendEmail");
+const Otp = require("../model/OtpModel");
 
 exports.register = async (req, res) => {
     try {
@@ -14,91 +15,97 @@ exports.register = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        const user = new User({ name, email, password: hashedPassword });
+        const user = new User({ name, email, password: hashedPassword, isVerified: false });
         await user.save();
-        
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
-        const verifyLink = `${process.env.CLIENT_URL}/api/auth/verify/${token}`;
 
-        // Send verification email
-        await sendEmail(user.email, "Verify Your Email", `
-      <h2>Welcome ${user.name}</h2>
-      <p>Please verify your email by clicking the link below:</p>
-      <a href="${verifyLink}">Verify Email</a>
+        // Generate OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+        await Otp.create({
+            email,
+            otp,
+            otpExpire: new Date(Date.now() + 5 * 60 * 1000), // 5 mins
+        });
+
+        await sendEmail(email, "Verify Your Email", `
+      <h2>Welcome ${name}</h2>
+      <p>Your OTP is <b>${otp}</b>. It expires in 5 minutes.</p>
     `);
 
-        res.json({ msg: "Registration successful, check email to verify account" });
+        res.json({ msg: "Registration successful, check email for OTP" });
     } catch (err) {
         console.error("Register error:", err);
         res.status(500).json({ msg: "Server error" });
     }
-      
-    
 };
 exports.verifyEmail = async (req, res) => {
     try {
-        const token = req.params.token;
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const { email, otp } = req.body;
 
-        const user = await User.findById(decoded.id);
-        if (!user) return res.status(400).json({ msg: "Invalid token" });
+        const record = await Otp.findOne({ email }).sort({ createdAt: -1 });
+        if (!record) return res.status(400).json({ msg: "OTP not found" });
+        if (record.otpExpire < Date.now())
+        {
+            await User.deleteOne({ email, isVerified: false });
+            return res.status(400).json({ msg: "OTP expired" });
 
-        user.isVerified = true;
-        await user.save();
+        }
+        if (record.otp !== otp) return res.status(400).json({ msg: "Invalid OTP" });
+
+        await User.updateOne({ email }, { isVerified: true });
+        await Otp.deleteMany({ email }); // cleanup
 
         res.json({ msg: "Email verified successfully!" });
     } catch (err) {
-        res.status(400).json({ msg: "Invalid or expired token" });
+        res.status(500).json({ msg: "Server error" });
     }
 };
+
 exports.forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
         const user = await User.findOne({ email });
         if (!user) return res.status(400).json({ msg: "User not found" });
- 
-        const resetToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "15m" });
-        user.resetPasswordToken = resetToken;
-        user.resetPasswordExpire = Date.now() + 15 * 60 * 1000; // 15 mins
-        await user.save();
 
-        const resetLink = `${process.env.CLIENT_URL}/api/auth/reset/${resetToken}`;
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-        await sendEmail(user.email, "Password Reset", `
+        await Otp.create({
+            email,
+            otp,
+            otpExpire: new Date(Date.now() + 10 * 60 * 1000), // 10 mins
+        });
+
+        await sendEmail(email, "Password Reset OTP", `
       <h2>Hello ${user.name}</h2>
-      <p>Click below to reset your password (valid for 15 minutes):</p>
-      <a href="${resetLink}">Reset Password</a>
+      <p>Your OTP for password reset is <b>${otp}</b>. It expires in 10 minutes.</p>
     `);
 
-        res.json({ msg: "Password reset link sent to email" });
+        res.json({ msg: "OTP sent to email for password reset" });
     } catch (err) {
         res.status(500).json({ msg: "Server error" });
     }
 };
+
 exports.resetPassword = async (req, res) => {
     try {
-        const { token } = req.params;
-        const { password } = req.body;
+        const { email, otp, password } = req.body;
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-        const user = await User.findById(decoded.id);
-        if (!user || user.resetPasswordToken !== token || user.resetPasswordExpire < Date.now()) {
-            return res.status(400).json({ msg: "Invalid or expired token" });
-        }
+        const record = await Otp.findOne({ email }).sort({ createdAt: -1 });
+        if (!record) return res.status(400).json({ msg: "OTP not found" });
+        if (record.otpExpire < Date.now()) return res.status(400).json({ msg: "OTP expired" });
+        if (record.otp !== otp) return res.status(400).json({ msg: "Invalid OTP" });
 
         const salt = await bcrypt.genSalt(10);
-        user.password = await bcrypt.hash(password, salt);
+        const hashedPassword = await bcrypt.hash(password, salt);
 
-        user.resetPasswordToken = undefined;
-        user.resetPasswordExpire = undefined;
-        await user.save();
-
+        await User.updateOne({ email }, { password: hashedPassword });
+        await Otp.deleteMany({ email }); 
         res.json({ msg: "Password reset successful" });
     } catch (err) {
-        res.status(400).json({ msg: "Invalid or expired token" });
+        res.status(500).json({ msg: "Server error" });
     }
 };
+
 
 
 exports.login = async (req, res) => {

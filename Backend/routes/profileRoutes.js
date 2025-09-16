@@ -15,14 +15,14 @@ const router = express.Router();
 
 const { protect } = require("../middleware/authMiddleware");
 
-router.post("/", createProfile);
-router.get("/", getMyProfiles);
-router.get("/profiles/:profileId", protect, getProfileById);
-router.put("/profiles/:profileId", protect, updateProfile);
-router.delete("/profiles/:profileId", protect, deleteProfile);
-router.post("/profiles/:profileId/trailers", protect, addTrailer);
-router.put("/profiles/:profileId/trailers/:trailerId", protect, updateTrailer);
-router.delete("/profiles/:profileId/trailers/:trailerId", protect, deleteTrailer);
+router.post("/", protect,createProfile);
+router.get("/",protect, getMyProfiles);
+router.get("/:profileId", protect, getProfileById);
+router.put("/:profileId", protect, updateProfile);
+router.delete("/:profileId", protect, deleteProfile);
+router.post("/:profileId/trailers", protect, addTrailer);
+router.put("/:profileId/trailers/:trailerId", protect, updateTrailer);
+router.delete("/:profileId/trailers/:trailerId", protect, deleteTrailer);
 router.get("/user/:userId", getProfilesByUserId);
 
 module.exports = router;
