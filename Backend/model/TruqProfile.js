@@ -32,6 +32,18 @@ const EmbeddedTrailerSchema = new Schema({
 
 
 const ProfileSchema = new Schema({
+
+    isActive: {
+        type: Boolean,  
+        default: false
+    },
+   profileType: {
+        type: String,
+        enum: ['General freight', 'OSOM', 'Bus','SPV','Agricultural','Tow'],
+        required: [true, 'Profile type is required.'],
+        default: 'General freight' 
+    },
+
     profileName: {
         type: String,
         required: [true, 'Profile Name is required.'],
