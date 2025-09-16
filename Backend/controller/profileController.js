@@ -2,7 +2,7 @@
 const { Profile } = require('../model/TruqProfile.js');
 const mongoose = require('mongoose');
 const User = require('../model/User');
-
+const a=1;
 const createProfile = async (req, res) => {
     try {
         const { profileName, vehicle, isArticulated, trailers } = req.body;
