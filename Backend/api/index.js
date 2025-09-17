@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 const connectDB = require("../config/db");
 const authRoutes = require("../routes/authRoutes");
 const profileRoutes = require("../routes/profileRoutes");
+const hazardRoutes = require("../routes/hazardRoute");
 
 dotenv.config();
 connectDB();
@@ -37,6 +38,7 @@ app.use(cookieParser());
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/profiles", profileRoutes);
+app.use("/api/hazards", hazardRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

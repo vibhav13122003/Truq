@@ -32,7 +32,14 @@ exports.register = async (req, res) => {
       <p>Your OTP is <b>${otp}</b>. It expires in 5 minutes.</p>
     `);
 
-        res.json({ msg: "Registration successful, check email for OTP" });
+        res.json({
+            msg: "Registration successful, check email for OTP",
+            user: {
+                name: user.name,
+                email: user.email,
+                isVerified: user.isVerified
+            }
+        });
     } catch (err) {
         console.error("Register error:", err);
         res.status(500).json({ msg: "Server error" });
@@ -123,7 +130,16 @@ exports.login = async (req, res) => {
         });
 
         res.cookie("token", token, { httpOnly: true });
-        res.json({ msg: "Login successful", token });
+        res.json({
+            msg: "Login successful",
+            token,
+            user: {
+                name: user.name,
+                email: user.email,
+                isVerified: user.isVerified
+            }
+        });
+
     } catch (err) {
         res.status(500).json({ msg: "Server error" });
     }
