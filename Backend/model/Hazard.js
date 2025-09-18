@@ -33,6 +33,11 @@ const HazardSchema = new Schema({
         },
        
     ],
+    status: {
+        type: String,
+        enum: ['New', 'Completed', 'In Progress'],
+        default: 'Pending'
+    },
     isApproved: {
         type: Boolean,
         default: false

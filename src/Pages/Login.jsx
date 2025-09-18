@@ -52,13 +52,16 @@ const LoginPage = () => {
 
     setLoading(true);
     try {
-      const res = await fetch("https://truq-nzas.vercel.app/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      const res = await fetch(
+        "https://stingray-app-moubo.ondigitalocean.app/api/auth/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        }
+      );
 
       const data = await res.json();
 

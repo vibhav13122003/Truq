@@ -163,3 +163,59 @@ exports.getAllUsers=async(req,res)=>{
         res.status(500).json({msg:"Server error"});
     }
 }
+// ====================== UPDATE USER ======================
+exports.updateUserProfile = async (req, res) => {
+    try {
+        const { name, email, password } = req.body;
+        const userId = req.user.id; // comes from auth middleware
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ msg: "User not found" });
+        }
+
+        if (name) user.name = name;
+        if (email) user.email = email;
+
+        if (password) {
+            const salt = await bcrypt.genSalt(10);
+            user.password = await bcrypt.hash(password, salt);
+        }
+
+        await user.save();
+
+        res.json({
+            msg: "Profile updated successfully",
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                isVerified: user.isVerified,
+            }
+        });
+    } catch (err) {
+        console.error("Update error:", err);
+        res.status(500).json({ msg: "Server error" });
+    }
+};
+
+
+// ====================== DELETE USER ======================
+exports.deleteUserProfile = async (req, res) => {
+    try {
+        const userId = req.user.id; // comes from auth middleware
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ msg: "User not found" });
+        }
+
+        await User.findByIdAndDelete(userId);
+
+        res.clearCookie("token"); // optional: log out after delete
+        res.json({ msg: "User deleted successfully" });
+    } catch (err) {
+        console.error("Delete error:", err);
+        res.status(500).json({ msg: "Server error" });
+    }
+};
