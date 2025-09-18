@@ -4,13 +4,20 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const sendEmail = require("../utils/sendEmail");
 const Otp = require("../model/OtpModel");
+const generateToken = (id) => {
+    return jwt.sign({ id }, process.env.JWT_SECRET, {
+        expiresIn: "7d", // adjust expiry as you want
+    });
+};
 
 exports.register = async (req, res) => {
     try {
         const { name, email, password } = req.body;
 
         const existingUser = await User.findOne({ email });
-        if (existingUser) return res.status(400).json({ msg: "User already exists" });
+        if (existingUser) {
+            return res.status(400).json({ msg: "User already exists" });
+        }
 
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
@@ -27,17 +34,26 @@ exports.register = async (req, res) => {
             otpExpire: new Date(Date.now() + 5 * 60 * 1000), // 5 mins
         });
 
-        await sendEmail(email, "Verify Your Email", `
-      <h2>Welcome ${name}</h2>
-      <p>Your OTP is <b>${otp}</b>. It expires in 5 minutes.</p>
-    `);
+        // Send verification email
+        await sendEmail(
+            email,
+            "Verify Your Email",
+            `<h2>Welcome ${name}</h2>
+             <p>Your OTP is <b>${otp}</b>. It expires in 5 minutes.</p>`
+        );
 
-        res.json({
+        // Generate JWT
+        const token = generateToken(user._id);
+        console.log("Generated Token:", token); // Debug
+
+        res.status(201).json({
             msg: "Registration successful, check email for OTP",
+            token,               
             user: {
+                id: user._id,
                 name: user.name,
                 email: user.email,
-                isVerified: user.isVerified
+                isVerified: user.isVerified,
             }
         });
     } catch (err) {
@@ -45,6 +61,7 @@ exports.register = async (req, res) => {
         res.status(500).json({ msg: "Server error" });
     }
 };
+
 exports.verifyEmail = async (req, res) => {
     try {
         const { email, otp } = req.body;
@@ -53,7 +70,7 @@ exports.verifyEmail = async (req, res) => {
         if (!record) return res.status(400).json({ msg: "OTP not found" });
         if (record.otpExpire < Date.now())
         {
-            await User.deleteOne({ email, isVerified: false });
+            await User.findOneAndDelete({ email, isVerified: false });
             return res.status(400).json({ msg: "OTP expired" });
 
         }
@@ -126,20 +143,11 @@ exports.login = async (req, res) => {
         if (!isMatch) return res.status(400).json({ msg: "Invalid credentials" });
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-            expiresIn: "1h",
+            expiresIn: "7d",
         });
 
         res.cookie("token", token, { httpOnly: true });
-        res.json({
-            msg: "Login successful",
-            token,
-            user: {
-                name: user.name,
-                email: user.email,
-                isVerified: user.isVerified
-            }
-        });
-
+        res.json({ msg: "Login successful", token });
     } catch (err) {
         res.status(500).json({ msg: "Server error" });
     }

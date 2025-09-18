@@ -10,5 +10,6 @@ const UserSchema = new mongoose.Schema({
     resetPasswordExpire: { type: Date }
 
 }, { timestamps: true });
+UserSchema.index({ createdAt: 1 }, { expireAfterSeconds: 300, partialFilterExpression: { isVerified: false } });
 
 module.exports = mongoose.model("User", UserSchema);
