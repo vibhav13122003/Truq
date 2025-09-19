@@ -1,89 +1,73 @@
 import React, { useState } from "react";
 import Sidebar from "../Components/Sidebar"; // <-- adjust path if needed
 
-// --- New Modal Component ---
-// This component displays the details of a single report in a modal dialog.
+import {
+  HiOutlineUsers,
+  HiOutlineUser,
+  HiOutlineUserGroup,
+  HiOutlineExclamationCircle,
+  HiOutlineChevronDown,
+} from "react-icons/hi";
+
+import { RiAlertFill } from "react-icons/ri";
+import { FaCreditCard } from "react-icons/fa6";
+import { FaUserCog, FaClipboardList } from "react-icons/fa";
+
+const UserIcon = () => <HiOutlineUser className='w-5 h-5 text-gray-600' />;
+const DownArrowIcon = () => (
+  <HiOutlineChevronDown className='w-4 h-4 ml-1 text-gray-600' />
+);
+
 const ReportDetailModal = ({ report, onClose, statusColors }) => {
   if (!report) return null;
 
-  // Handler for actions inside the modal (Approve, Reject, Delete)
   const handleAction = (action) => {
     console.log(`${action} clicked for report: ${report.id}`);
-    onClose(); // Close the modal after action
+    onClose();
   };
 
   return (
-    // Backdrop
     <div
-      className='fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex justify-center items-center'
-      onClick={onClose} // Close modal on backdrop click
+      className='fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex justify-center items-start pt-20'
+      onClick={onClose}
     >
-      {/* Modal Panel */}
       <div
-        className='bg-white rounded-lg shadow-xl w-full max-w-3xl m-4'
-        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
+        className='bg-white rounded-lg shadow-xl w-full max-w-3xl m-4 overflow-hidden'
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* Modal Header */}
-        <div className='flex justify-between items-start p-5 border-b rounded-t'>
+        {/* Header */}
+        <div className='flex justify-between items-center px-6 py-4 border-b border-gray-200'>
           <div>
-            <h3 className='text-2xl font-bold text-gray-900'>{report.id}</h3>
-            <p className='text-base text-gray-500'>Hazard Report Details</p>
+            <h3 className='text-lg font-semibold text-gray-900'>{report.id}</h3>
+            <p className='text-sm text-gray-500'>Hazard Report Details</p>
           </div>
           <button
             onClick={onClose}
-            className='text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center'
+            className='text-gray-400 hover:text-gray-900 rounded-full p-1'
           >
-            <svg
-              className='w-5 h-5'
-              fill='currentColor'
-              viewBox='0 0 20 20'
-              xmlns='http://www.w3.org/2000/svg'
-            >
-              <path
-                fillRule='evenodd'
-                d='M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z'
-                clipRule='evenodd'
-              ></path>
-            </svg>
+            ✕
           </button>
         </div>
 
-        {/* Modal Body */}
-        <div className='p-6 grid grid-cols-1 md:grid-cols-2 gap-6'>
-          {/* Left Column: Details */}
-          <div className='space-y-4'>
+        {/* Body */}
+        <div className='px-6 py-4 grid grid-cols-1 md:grid-cols-2 gap-6'>
+          <div className='space-y-3'>
+            {[
+              { label: "Date & Time", value: report.datetime },
+              { label: "Location", value: report.location },
+              { label: "Reported By", value: report.email },
+              { label: "Hazard Type", value: report.hazard },
+              { label: "Affected Vehicles", value: report.vehicles },
+            ].map((item) => (
+              <div key={item.label}>
+                <p className='text-xs text-gray-500'>{item.label}</p>
+                <p className='text-sm font-medium text-gray-800'>
+                  {item.value}
+                </p>
+              </div>
+            ))}
             <div>
-              <p className='text-sm text-gray-500'>Date & Time</p>
-              <p className='text-md font-semibold text-gray-800'>
-                {report.datetime}
-              </p>
-            </div>
-            <div>
-              <p className='text-sm text-gray-500'>Location</p>
-              <p className='text-md font-semibold text-gray-800'>
-                {report.location}
-              </p>
-            </div>
-            <div>
-              <p className='text-sm text-gray-500'>Reported By</p>
-              <p className='text-md font-semibold text-gray-800'>
-                {report.email}
-              </p>
-            </div>
-            <div>
-              <p className='text-sm text-gray-500'>Hazard Type</p>
-              <p className='text-md font-semibold text-gray-800'>
-                {report.hazard}
-              </p>
-            </div>
-            <div>
-              <p className='text-sm text-gray-500'>Affected Vehicles</p>
-              <p className='text-md font-semibold text-gray-800'>
-                {report.vehicles}
-              </p>
-            </div>
-            <div>
-              <p className='text-sm text-gray-500'>Status</p>
+              <p className='text-xs text-gray-500'>Status</p>
               <span
                 className={`px-2 py-1 text-xs font-medium rounded ${
                   statusColors[report.status]
@@ -93,54 +77,47 @@ const ReportDetailModal = ({ report, onClose, statusColors }) => {
               </span>
             </div>
           </div>
-          {/* Right Column: Image */}
-          <div className='flex items-center justify-center bg-gray-100 rounded-lg'>
-            <p className='text-gray-400'>Image</p>
-            {/* If you have an image URL, you can use an <img> tag here */}
-            {/* <img src={report.imageUrl} alt="Hazard" className="rounded-lg object-cover w-full h-full" /> */}
+          <div className='flex items-center justify-center bg-gray-50 rounded-lg'>
+            {/* You can replace this with an actual image if you have one */}
+            {report.imageUrl ? (
+              <img
+                src={report.imageUrl}
+                alt='Hazard'
+                className='object-cover h-full w-full rounded-lg'
+              />
+            ) : (
+              <p className='text-gray-400'>Image Placeholder</p>
+            )}
           </div>
         </div>
 
-        {/* Description Section */}
-        <div className='px-6 pb-6'>
-          <p className='text-sm text-gray-500'>Description</p>
-          <div className='w-full bg-gray-50 p-3 rounded-md mt-1'>
-            <p className='text-md text-gray-800'>{report.description}</p>
-          </div>
+        {/* Description */}
+        <div className='px-6 py-4 border-t border-gray-200'>
+          <p className='text-xs text-gray-500'>Description</p>
+          <p className='text-sm text-gray-800 mt-1'>{report.description}</p>
         </div>
 
-        {/* Modal Footer */}
-        <div className='flex items-center justify-start p-6 space-x-2 border-t border-gray-200 rounded-b'>
+        {/* Footer Actions */}
+        <div className='px-6 py-4 border-t border-gray-200 flex space-x-2'>
           <button
             onClick={() => handleAction("Approve")}
-            className='text-white bg-green-500 hover:bg-green-600 font-medium rounded-lg text-sm px-5 py-2.5 text-center'
+            className=' hover:bg-green-600 text-white px-4 py-2 rounded text-sm'
+            style={{ backgroundColor: "#22C55E" }}
           >
             Approve
           </button>
           <button
             onClick={() => handleAction("Reject")}
-            className='text-white bg-red-500 hover:bg-red-600 font-medium rounded-lg text-sm px-5 py-2.5 text-center'
+            className=' hover:bg-red-600 text-white px-4 py-2 rounded text-sm'
+            style={{ backgroundColor: "#EF4444" }}
           >
             Reject
           </button>
           <button
             onClick={() => handleAction("Delete")}
-            className='text-white bg-teal-600 hover:bg-teal-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center'
+            className=' hover:bg-teal text-white px-4 py-2 rounded text-sm flex items-center gap-1'
+            style={{ backgroundColor: "#008080" }}
           >
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              className='h-4 w-4 inline-block -mt-0.5 mr-1'
-              fill='none'
-              viewBox='0 0 24 24'
-              stroke='currentColor'
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                d='M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16'
-              />
-            </svg>
             Delete
           </button>
         </div>
@@ -151,182 +128,210 @@ const ReportDetailModal = ({ report, onClose, statusColors }) => {
 
 const TruqieReports = () => {
   const [currentRoute, setRoute] = useState("truqie");
-  const [selectedReport, setSelectedReport] = useState(null); // State to hold the report for the modal
+  const [selectedReport, setSelectedReport] = useState(null);
 
-  // Updated mock data with descriptions and more specific locations
+  // --- DEMO DATA ADDED HERE ---
   const reports = [
     {
-      id: "HR-2024-001",
-      datetime: "2024-01-15 14:30",
-      location: "Interstate 95, Mile Marker 45, Jacksonville, FL",
-      email: "driver@truq.com",
-      hazard: "Weather",
-      vehicles: "Truck, Car",
+      id: "HRT-001",
+      datetime: "2025-09-19 11:45",
+      location: "NH-27, Near Unnao Toll Plaza",
+      email: "driver.one@email.com",
+      hazard: "Accident",
+      vehicles: "All Vehicles",
       status: "Pending",
       description:
-        "Heavy fog reducing visibility to less than 50 feet. Multiple vehicles pulled over.",
+        "A multi-car pile-up is blocking two lanes. Traffic is heavily congested. Emergency services are on the scene.",
+      imageUrl: "https://via.placeholder.com/400x300.png?text=Accident+Scene",
     },
     {
-      id: "HR-2024-002",
-      datetime: "2024-01-15 09:15",
-      location: "Route 66 Junction near Amarillo, TX",
-      email: "trucker123@email.com",
-      hazard: "Debris",
-      vehicles: "Truck",
+      id: "HRT-002",
+      datetime: "2025-09-19 09:15",
+      location: "Lucknow-Agra Expressway, KM 152",
+      email: "trucker.two@email.com",
+      hazard: "Pothole",
+      vehicles: "Trucks, Buses",
       status: "Verified",
       description:
-        "Large metal debris, possibly from another vehicle, is blocking the right lane.",
+        "There is a very large and deep pothole in the right lane that could cause significant damage to tires and suspension, especially for heavy vehicles.",
+      imageUrl: "https://via.placeholder.com/400x300.png?text=Large+Pothole",
     },
     {
-      id: "HR-2024-003",
-      datetime: "2024-01-14 22:45",
-      location: "Highway 101 Bridge, Bixby Creek, CA",
-      email: "safety@transport.com",
-      hazard: "Animal Crossing",
-      vehicles: "Car, Truck, RV",
+      id: "HRT-003",
+      datetime: "2025-09-18 22:30",
+      location: "Kanpur Bypass Road",
+      email: "driver.three@email.com",
+      hazard: "Roadblock",
+      vehicles: "All Vehicles",
+      status: "Verified",
+      description:
+        "A fallen tree from last night's storm is completely blocking the road. Authorities have been notified.",
+      imageUrl: "https://via.placeholder.com/400x300.png?text=Fallen+Tree",
+    },
+    {
+      id: "HRT-004",
+      datetime: "2025-09-18 17:00",
+      location: "SH-38, Near Bithoor",
+      email: "commuter.four@email.com",
+      hazard: "Water Logging",
+      vehicles: "Cars, Bikes",
       status: "Rejected",
       description:
-        "Reported a deer on the road, but it was gone upon arrival. No longer a hazard.",
+        "Minor water logging reported after rain, but it has since cleared up and is no longer a hazard.",
+      imageUrl: null,
     },
     {
-      id: "HR-2024-004",
-      datetime: "2024-01-14 16:20",
-      location: "I-10 Construction Zone, Phoenix, AZ",
-      email: "fleet@logistics.com",
-      hazard: "Construction",
-      vehicles: "Truck, Car",
+      id: "HRT-005",
+      datetime: "2025-09-19 15:20",
+      location: "Ganga Barrage, Kanpur",
+      email: "driver.five@email.com",
+      hazard: "Heavy Traffic",
+      vehicles: "All Vehicles",
       status: "Pending",
-      description: "Unmarked lane shift causing confusion and sudden braking.",
+      description:
+        "Unusual traffic jam on the Ganga Barrage bridge heading towards Unnao. Cause is unknown.",
+      imageUrl: "https://via.placeholder.com/400x300.png?text=Traffic+Jam",
     },
   ];
-
-  const statusColors = {
-    Pending: "bg-gray-200 text-gray-700",
-    Verified: "bg-green-100 text-green-700",
-    Rejected: "bg-red-100 text-red-700",
-  };
-
-  const handleViewReport = (report) => {
-    setSelectedReport(report);
-  };
-
-  const handleCloseModal = () => {
-    setSelectedReport(null);
-  };
+const statusColors = {
+  Pending: "bg-[#F3F4F6] color-[#374151]",   // light gray bg, dark gray text
+  Verified: "bg-[#DCFCE7] color-[#166534]",  // light green bg, darker green text
+  Rejected: "bg-[#FEE2E2] color-[#991B1B]",  // light red bg, darker red text
+};
 
   return (
-    <div className='flex h-screen bg-gray-50'>
+    <div className='flex h-screen'>
       {/* Sidebar */}
       <Sidebar currentRoute={currentRoute} setRoute={setRoute} />
 
-      {/* Main Content */}
-      <div className='flex-1 p-8 overflow-y-auto'>
+      {/* Main content */}
+      <div className='bg-gray-50 flex-1 flex flex-col'>
         {/* Header */}
-        <h2 className='text-lg font-semibold mb-2'>Admin Panel</h2>
-        <h1 className='text-2xl font-bold mb-1'>Truqie Reports</h1>
-        <p className='text-gray-600 mb-6'>
-          Manage and moderate truqie reports submitted by drivers
-        </p>
-
-        {/* Filters */}
-        <div className='flex flex-wrap items-center space-x-2 mb-4'>
-          <select className='border rounded px-3 py-2 text-sm'>
-            <option>All Status</option>
-            <option>Pending</option>
-            <option>Verified</option>
-            <option>Rejected</option>
-          </select>
-          <input
-            type='text'
-            placeholder='Search by location, type, or ID...'
-            className='flex-1 border rounded px-3 py-2 text-sm'
-          />
-          <button className='px-4 py-2 text-sm bg-gray-100 rounded'>
-            Clear Filters
-          </button>
-        </div>
-
-        {/* Table */}
-        <div className='bg-white shadow rounded-lg overflow-hidden'>
-          <table className='w-full text-sm'>
-            <thead className='bg-gray-100 text-gray-600 text-left'>
-              <tr>
-                <th className='px-4 py-2'>Report ID</th>
-                <th className='px-4 py-2'>Date/Time</th>
-                <th className='px-4 py-2'>Location</th>
-                <th className='px-4 py-2'>Email ID</th>
-                <th className='px-4 py-2'>Hazard Type</th>
-                <th className='px-4 py-2'>Vehicle Types</th>
-                <th className='px-4 py-2'>Status</th>
-                <th className='px-4 py-2'>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {reports.map((r) => (
-                <tr key={r.id} className='border-b last:border-none'>
-                  <td className='px-4 py-2'>{r.id}</td>
-                  <td className='px-4 py-2'>{r.datetime}</td>
-                  <td className='px-4 py-2'>{r.location}</td>
-                  <td className='px-4 py-2'>{r.email}</td>
-                  <td className='px-4 py-2 flex items-center space-x-1'>
-                    <span className='text-yellow-500'>⚠️</span>
-                    <span>{r.hazard}</span>
-                  </td>
-                  <td className='px-4 py-2'>{r.vehicles}</td>
-                  <td className='px-4 py-2'>
-                    <span
-                      className={`px-2 py-1 text-xs font-medium rounded ${
-                        statusColors[r.status]
-                      }`}
-                    >
-                      {r.status}
-                    </span>
-                  </td>
-                  <td className='px-4 py-2'>
-                    <button
-                      onClick={() => handleViewReport(r)}
-                      className='bg-teal-600 hover:bg-teal-700 text-white px-3 py-1 text-sm rounded'
-                    >
-                      View
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Status Legend */}
-        <div className='mt-6 bg-white p-4 rounded-lg shadow text-sm'>
-          <h3 className='font-semibold mb-2'>Status Legend</h3>
-          <div className='flex flex-wrap gap-4'>
-            <span>
-              <span className='px-2 py-1 bg-gray-200 rounded text-gray-700 text-xs'>
-                Pending
-              </span>{" "}
-              Awaiting review
-            </span>
-            <span>
-              <span className='px-2 py-1 bg-green-100 rounded text-green-700 text-xs'>
-                Verified
-              </span>{" "}
-              Confirmed hazard
-            </span>
-            <span>
-              <span className='px-2 py-1 bg-red-100 rounded text-red-700 text-xs'>
-                Rejected
-              </span>{" "}
-              Invalid or resolved
-            </span>
+        <header className='bg-white shadow-sm p-4 border-b border-gray-200'>
+          <div className='flex justify-between items-center'>
+            <h1 className='text-xl font-semibold text-gray-700'>Admin Panel</h1>
+            <button className='flex items-center p-2 rounded-full bg-gray-100 hover:bg-gray-200'>
+              <UserIcon />
+            </button>
           </div>
-        </div>
+        </header>
+
+        <main className='p-8 overflow-y-auto'>
+          {/* Filters */}
+          <div className='mb-8'>
+            <h2 className='text-3xl font-bold text-gray-800'>Truqie Reports</h2>
+            <p className='text-gray-500 mt-1'>
+              Manage and moderate reports by the drivers
+            </p>
+          </div>
+
+          <div className='flex flex-wrap items-center gap-2 mb-6'>
+            <select className='border border-gray-300 rounded px-3 py-2 text-sm'>
+              <option>All Status</option>
+              <option>Pending</option>
+              <option>Verified</option>
+              <option>Rejected</option>
+            </select>
+            <input
+              type='text'
+              placeholder='Search by location, type, or ID...'
+              className='flex-1 border border-gray-300 rounded px-3 py-2 text-sm'
+            />
+            <button className='px-4 py-2 text-sm bg-gray-100 rounded hover:bg-gray-200'>
+              Clear Filters
+            </button>
+          </div>
+
+          {/* Reports Table */}
+          <div className='bg-white rounded-lg shadow-md overflow-x-auto mb-6'>
+            <table className='min-w-full text-sm text-gray-600'>
+              <thead className='bg-gray-50 text-xs text-gray-700 uppercase tracking-wider'>
+                <tr>
+                  {[
+                    "Report ID",
+                    "Date/Time",
+                    "Location",
+                    "Email ID",
+                    "Hazard Type",
+                    "Vehicle Types",
+                    "Status",
+                    "Actions",
+                  ].map((h) => (
+                    <th key={h} className='p-4 text-left'>
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {reports.map((r) => (
+                  <tr
+                    key={r.id}
+                    className='border-b last:border-none hover:bg-gray-50'
+                  >
+                    <td className='p-4'>{r.id}</td>
+                    <td className='p-4'>{r.datetime}</td>
+                    <td className='p-4'>{r.location}</td>
+                    <td className='p-4'>{r.email}</td>
+                    <td className='p-4 flex items-center gap-1'>
+                      <span className='text-yellow-500'>⚠️</span> {r.hazard}
+                    </td>
+                    <td className='p-4'>{r.vehicles}</td>
+                    <td className='p-4'>
+                      <span
+                        className={`px-2 py-1 text-xs rounded ${
+                          statusColors[r.status]
+                        }`}
+                      >
+                        {r.status}
+                      </span>
+                    </td>
+                    <td className='p-4'>
+                      <button
+                        onClick={() => setSelectedReport(r)}
+                        className='px-3 py-1 rounded text-sm text-white'
+                        style={{ backgroundColor: "#008080" }}
+                      >
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Status Legend */}
+          <div className='bg-white p-6 rounded-lg shadow-md mb-6 text-sm'>
+            <h3 className='font-semibold mb-2'>Status Legend</h3>
+            <div className='flex flex-wrap gap-4 text-gray-600'>
+              <span>
+                <span className='px-2 py-1 bg-gray-200 rounded text-xs'>
+                  Pending
+                </span>{" "}
+                Awaiting review
+              </span>
+              <span>
+                <span className='px-2 py-1 bg-green-100 rounded text-xs'>
+                  Verified
+                </span>{" "}
+                Confirmed hazard
+              </span>
+              <span>
+                <span className='px-2 py-1 bg-red-100 rounded text-xs'>
+                  Rejected
+                </span>{" "}
+                Invalid or resolved
+              </span>
+            </div>
+          </div>
+        </main>
       </div>
 
-      {/* Conditionally render the modal */}
       {selectedReport && (
         <ReportDetailModal
           report={selectedReport}
-          onClose={handleCloseModal}
+          onClose={() => setSelectedReport(null)}
           statusColors={statusColors}
         />
       )}

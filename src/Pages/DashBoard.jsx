@@ -2,86 +2,38 @@
 import React from "react";
 import Sidebar from "../Components/Sidebar"; // ✅ make sure path is correct
 
-// --- Icon Components for Dashboard ---
+import {
+  HiOutlineUsers,
+  HiOutlineUser,
+  HiOutlineUserGroup,
+  HiOutlineExclamationCircle,
+  HiOutlineChevronDown,
+  
+} from "react-icons/hi";
+
+import { RiAlertFill } from "react-icons/ri";
+import { FaCreditCard } from "react-icons/fa6";
+import { FaUserCog, FaClipboardList } from "react-icons/fa";
+
+
+// Users Icon
 const UsersIcon = () => (
-  <svg
-    className='w-8 h-8 text-blue-500'
-    fill='none'
-    stroke='currentColor'
-    viewBox='0 0 24 24'
-  >
-    <path
-      strokeLinecap='round'
-      strokeLinejoin='round'
-      strokeWidth='2'
-      d='M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm-9 3a2 2 0 11-4 0 2 2 0 014 0z'
-    ></path>
-  </svg>
+  <HiOutlineUserGroup className='w-8 h-8' style={{ color: "#008080" }} />
 );
-
 const SubscribersIcon = () => (
-  <svg
-    className='w-8 h-8 text-green-500'
-    fill='none'
-    stroke='currentColor'
-    viewBox='0 0 24 24'
-  >
-    <path
-      strokeLinecap='round'
-      strokeLinejoin='round'
-      strokeWidth='2'
-      d='M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z'
-    ></path>
-  </svg>
+  <FaCreditCard className='w-8 h-8' style={{ color: "#008080" }} />
 );
-
 const TruqieAlertIcon = () => (
-  <svg
-    className='w-8 h-8 text-yellow-500'
-    fill='none'
-    stroke='currentColor'
-    viewBox='0 0 24 24'
-  >
-    <path
-      strokeLinecap='round'
-      strokeLinejoin='round'
-      strokeWidth='2'
-      d='M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z'
-    ></path>
-  </svg>
+  <RiAlertFill className='w-8 h-8' style={{ color: "#008080" }} />
 );
 
-const UserIcon = () => (
-  <svg
-    className='w-6 h-6'
-    fill='none'
-    stroke='currentColor'
-    viewBox='0 0 24 24'
-  >
-    <path
-      strokeLinecap='round'
-      strokeLinejoin='round'
-      strokeWidth={2}
-      d='M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'
-    />
-  </svg>
-);
 
-const DownArrowIcon = () => (
-  <svg
-    className='w-4 h-4 ml-1'
-    fill='none'
-    stroke='currentColor'
-    viewBox='0 0 24 24'
-  >
-    <path
-      strokeLinecap='round'
-      strokeLinejoin='round'
-      strokeWidth={2}
-      d='M19 9l-7 7-7-7'
-    />
-  </svg>
-);
+// User Icon
+const UserIcon = () => <HiOutlineUser className='w-6 h-6' />;
+
+// Down Arrow Icon
+const DownArrowIcon = () => <HiOutlineChevronDown className='w-4 h-4 ml-1' />;
+
 
 // --- Reusable Components ---
 const StatCard = ({ icon, value, title, subtitle }) => (
@@ -183,7 +135,6 @@ const DashboardPage = () => {
             <h1 className='text-xl font-semibold text-gray-700'>Admin Panel</h1>
             <button className='flex items-center p-2 rounded-full bg-gray-100 hover:bg-gray-200'>
               <UserIcon />
-              <DownArrowIcon />
             </button>
           </div>
         </header>
@@ -233,7 +184,10 @@ const DashboardPage = () => {
               </table>
             </div>
             <div className='mt-6'>
-              <button className='bg-teal-600 text-white font-bold py-2 px-5 rounded-lg hover:bg-teal-700 transition duration-300'>
+              <button
+                className='  text-white font-bold py-2 px-5 rounded-lg hover:bg-teal-700 transition duration-300'
+                style={{ backgroundColor: "#008080" }}
+              >
                 View All Reports
               </button>
             </div>
@@ -247,19 +201,7 @@ const DashboardPage = () => {
             <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
               <div className='bg-white p-6 rounded-lg shadow-md flex items-start space-x-4 hover:shadow-lg transition-shadow'>
                 <div className='bg-gray-100 p-3 rounded-lg'>
-                  <svg
-                    className='w-6 h-6 text-teal-600'
-                    fill='none'
-                    stroke='currentColor'
-                    viewBox='0 0 24 24'
-                  >
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      strokeWidth='2'
-                      d='M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V7a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
-                    ></path>
-                  </svg>
+                  <FaClipboardList style={{ color: "#008080" }} />
                 </div>
                 <div>
                   <h4 className='font-bold text-gray-800'>Manage Truqie</h4>
@@ -270,7 +212,7 @@ const DashboardPage = () => {
               </div>
               <div className='bg-white p-6 rounded-lg shadow-md flex items-start space-x-4 hover:shadow-lg transition-shadow'>
                 <div className='bg-gray-100 p-3 rounded-lg'>
-                  <UsersIcon />
+                  <FaUserCog style={{ color: "#008080" }} />
                 </div>
                 <div>
                   <h4 className='font-bold text-gray-800'>User Management</h4>

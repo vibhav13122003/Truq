@@ -1,5 +1,18 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "../Components/Sidebar";
+import {
+  HiOutlineUser,
+  HiOutlineChevronDown,
+  HiOutlineX, // Import the 'X' icon
+  HiOutlineClock, // Import the Clock icon
+} from "react-icons/hi";
+
+// (Other imports as before)
+import { RiAlertFill } from "react-icons/ri";
+import { FaCreditCard } from "react-icons/fa6";
+import { FaUserCog, FaClipboardList } from "react-icons/fa";
+
+const UserIcon = () => <HiOutlineUser className='w-5 h-5 text-gray-600' />;
 
 const UserTypeBadge = ({ type }) => (
   <span
@@ -13,6 +26,24 @@ const UserTypeBadge = ({ type }) => (
   </span>
 );
 
+// A reusable badge component for consistent styling
+const StatusBadge = ({ text, color = "green", count = false }) => {
+  const colorClasses = {
+    green: "bg-emerald-50 text-emerald-600",
+    teal: "bg-teal-50 text-teal-600",
+  };
+
+  const paddingClass = count ? "px-2.5 py-1" : "px-2 py-0.5";
+
+  return (
+    <span
+      className={`inline-flex items-center ${paddingClass} rounded-full text-xs font-medium ${colorClasses[color]}`}
+    >
+      {text}
+    </span>
+  );
+};
+
 const UserDetailsModal = ({
   user,
   profile,
@@ -22,22 +53,29 @@ const UserDetailsModal = ({
 }) => {
   if (!user) return null;
 
-  // Reusable component for displaying details exactly as in the screenshot
-  const DetailItem = ({ text }) => (
-    <p className='text-sm text-gray-700'>{text}</p>
+  // State to manage the active tab
+  const [activeTab, setActiveTab] = useState("profiles");
+
+  const DetailItem = ({ label, value }) => (
+    <p className='text-sm text-gray-700 whitespace-nowrap'>
+      <span className='text-gray-500'>{label} :</span> {value}
+    </p>
   );
 
   return (
     <div className='fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex justify-center items-center p-4'>
-      <div className='bg-white w-full max-w-3xl max-h-[95vh] overflow-y-auto rounded-xl shadow-lg'>
+      <div className='bg-white w-full max-w-3xl max-h-[95vh] overflow-y-auto rounded-xl shadow-lg no-scrollbar'>
         {/* Modal Header */}
-        <div className='sticky top-0 bg-white z-10 flex justify-between items-center border-b p-6'>
-          <h2 className='text-xl font-semibold text-gray-800'>User Details</h2>
+        <div className='sticky top-0 bg-white/80 backdrop-blur-sm z-10 flex justify-between items-center p-6 border-b'>
+          <div>
+            <h2 className='text-xl font-bold text-gray-900'>{user.name}</h2>
+            <p className='text-sm text-gray-500'>User Details</p>
+          </div>
           <button
             onClick={onClose}
-            className='text-gray-400 hover:text-gray-700 text-2xl leading-none'
+            className='p-1 rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600'
           >
-            &times;
+            <HiOutlineX className='w-6 h-6' />
           </button>
         </div>
 
@@ -71,9 +109,7 @@ const UserDetailsModal = ({
             <div className='grid grid-cols-2 gap-x-8 gap-y-4 items-start'>
               <div>
                 <p className='text-sm text-gray-500'>Status</p>
-                <span className='inline-flex items-center px-2.5 py-0.5 mt-0.5 rounded-md bg-green-100 text-green-700 text-sm font-medium'>
-                  Active
-                </span>
+                <StatusBadge text='Active' color='green' />
               </div>
               <div>
                 <p className='text-sm text-gray-500'>Joined On</p>
@@ -84,114 +120,191 @@ const UserDetailsModal = ({
             </div>
           </section>
 
-          {/* truq Profiles Section */}
-          <section>
-            <h3 className='text-base font-semibold text-gray-800 mb-4'>
-              truq Profiles
-            </h3>
-            {loading ? (
-              <p className='text-gray-500 mt-2'>Loading profiles...</p>
-            ) : profile && profile.length > 0 ? (
-              <div className='bg-gray-50 border rounded-lg p-4 space-y-4'>
-                <p className='text-sm text-gray-600 font-medium'>
-                  Total truq Profiles: {profile.length}
-                </p>
-                {profile.map((p) => (
-                  <div
-                    key={p._id}
-                    className='border rounded-lg p-4 shadow-sm bg-white'
-                  >
-                    <div className='flex justify-between items-start mb-4'>
-                      <h4 className='font-semibold text-gray-800'>
-                        {p.profileName}
-                      </h4>
-                      <span className='inline-flex items-center px-2.5 py-0.5 rounded-md bg-green-100 text-green-700 text-sm font-medium'>
-                        Active
-                      </span>
-                    </div>
+          {/* --- NEW TAB INTERFACE --- */}
+          <div>
+            {/* Tab Navigation */}
+            <div className='border-b border-gray-200'>
+              <nav className='-mb-px flex space-x-6' aria-label='Tabs'>
+                <button
+                  onClick={() => setActiveTab("profiles")}
+                  className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === "profiles"
+                      ? "border-teal-500 text-teal-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }`}
+                >
+                  truq Profiles
+                </button>
+                <button
+                  onClick={() => setActiveTab("truqies")}
+                  className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === "truqies"
+                      ? "border-teal-500 text-teal-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }`}
+                >
+                  truqies
+                </button>
+                <button
+                  onClick={() => setActiveTab("restStops")}
+                  className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === "restStops"
+                      ? "border-teal-500 text-teal-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }`}
+                >
+                  Rest Stops
+                </button>
+              </nav>
+            </div>
 
-                    <div className='flex justify-between'>
-                      {/* Left Column */}
-                      <div className='space-y-2'>
-                        <DetailItem text={`Vehicle Type :${p.vehicle.type}`} />
-                        <DetailItem text={`Height (m):${p.vehicle.height_m}`} />
-                        <DetailItem text={`Width (m):${p.vehicle.width_m}`} />
-                        <DetailItem text={`Axles :${p.vehicle.axles}`} />
-                        <DetailItem
-                          text={`Articulated : ${
-                            p.isArticulated ? "Yes" : "No"
-                          }`}
-                        />
-                      </div>
-
-                      {/* Middle Column with Avatar */}
-
-                      {/* Right Column */}
-                      <div className='space-y-2 text-sm'>
-                        <DetailItem text={`Profile Name :${p.profileName}`} />
-                        <DetailItem text={`Length (m):${p.vehicle.length_m}`} />
-                        <DetailItem
-                          text={`Weight (kg):${p.vehicle.weight_kg}`}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Trailer Information - only shown if articulated */}
-                    {p.isArticulated &&
-                      p.trailers &&
-                      p.trailers.length > 0 &&
-                      p.trailers.map((trailer, index) => (
+            {/* Tab Content */}
+            <div className='pt-6'>
+              {activeTab === "profiles" && (
+                <section>
+                  {loading ? (
+                    <p className='text-gray-500 mt-2'>Loading profiles...</p>
+                  ) : profile && profile.length > 0 ? (
+                    <div className='space-y-4'>
+                      <p className='text-sm text-gray-600 font-medium'>
+                        Total truq Profiles : {profile.length}
+                      </p>
+                      {profile.map((p) => (
                         <div
-                          key={trailer._id || index}
-                          className='mt-4 pt-4 border-t border-dashed'
+                          key={p._id}
+                          className='border rounded-lg p-4 shadow-sm bg-white'
                         >
-                          <div className='grid grid-cols-2 gap-x-12'>
+                          <div className='flex justify-between items-start mb-4'>
+                            <h4 className='font-semibold text-gray-800'>
+                              {p.profileName}
+                            </h4>
+                            <StatusBadge text='Active' color='green' />
+                          </div>
+
+                          <div className='grid grid-cols-2 gap-x-8'>
+                            {/* Left Column */}
                             <div className='space-y-2'>
                               <DetailItem
-                                text={`Trailer Number :${index + 1}`}
+                                label='Vehicle Type'
+                                value={p.vehicle.type}
                               />
                               <DetailItem
-                                text={`Height (m):${trailer.height_m}`}
+                                label='Height (m)'
+                                value={p.vehicle.height_m}
                               />
                               <DetailItem
-                                text={`Width (m):${trailer.width_m}`}
+                                label='Width (m)'
+                                value={p.vehicle.width_m}
                               />
                               <DetailItem
-                                text={`Laden :${
-                                  trailer.isLaden ? "Yes" : "No"
-                                }`}
+                                label='Axles'
+                                value={p.vehicle.axles}
+                              />
+                              <DetailItem
+                                label='Articulated'
+                                value={p.isArticulated ? "Yes" : "No"}
                               />
                             </div>
-                            <div className='space-y-2'>
+
+                            {/* Right Column */}
+                            <div className='space-y-2 text-sm'>
                               <DetailItem
-                                text={`Length (m):${trailer.length_m}`}
+                                label='Profile Name'
+                                value={p.profileName}
                               />
                               <DetailItem
-                                text={`Weight (kg):${trailer.weight_kg}`}
+                                label='Length (m)'
+                                value={p.vehicle.length_m}
                               />
-                              <DetailItem text={`Axles :${trailer.axles}`} />
+                              <DetailItem
+                                label='Weight (kg)'
+                                value={p.vehicle.weight_kg}
+                              />
                             </div>
                           </div>
+
+                          {/* Trailer Information */}
+                          {p.isArticulated &&
+                            p.trailers &&
+                            p.trailers.length > 0 &&
+                            p.trailers.map((trailer, index) => (
+                              <div
+                                key={trailer._id || index}
+                                className='mt-4 pt-4 border-t'
+                              >
+                                <div className='grid grid-cols-2 gap-x-8'>
+                                  <div className='space-y-2'>
+                                    <DetailItem
+                                      label='Trailer Number'
+                                      value={index + 1}
+                                    />
+                                    <DetailItem
+                                      label='Height (m)'
+                                      value={trailer.height_m}
+                                    />
+                                    <DetailItem
+                                      label='Width (m)'
+                                      value={trailer.width_m}
+                                    />
+                                    <DetailItem
+                                      label='Laden'
+                                      value={trailer.isLaden ? "Yes" : "No"}
+                                    />
+                                  </div>
+                                  <div className='space-y-2'>
+                                    <DetailItem
+                                      label='Length (m)'
+                                      value={trailer.length_m}
+                                    />
+                                    <DetailItem
+                                      label='Weight (kg)'
+                                      value={trailer.weight_kg}
+                                    />
+                                    <DetailItem
+                                      label='Axles'
+                                      value={trailer.axles}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
                         </div>
                       ))}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className='text-gray-500 mt-2'>No profiles found.</p>
-            )}
-          </section>
+                    </div>
+                  ) : (
+                    <p className='text-gray-500 mt-2'>No profiles found.</p>
+                  )}
+                </section>
+              )}
+              {activeTab === "truqies" && (
+                <div>
+                  <p className='text-gray-500'>
+                    Content for truqies will be shown here.
+                  </p>
+                </div>
+              )}
+              {activeTab === "restStops" && (
+                <div>
+                  <p className='text-gray-500'>
+                    Content for Rest Stops will be shown here.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
 
-          {/* User Submitted Reports Section */}
+          {/* User Submitted Reports Section (Kept for completeness) */}
           <section>
             <h3 className='text-base font-semibold text-gray-800 mb-4'>
               User Submitted Reports
             </h3>
             <div className='flex justify-between items-center mb-4'>
               <p className='text-gray-600 text-sm'>Recent Reports Submitted</p>
-              <span className='text-blue-600 bg-blue-100 text-xs font-semibold cursor-pointer px-2 py-1 rounded'>
-                {reports.length} Reports
-              </span>
+              <StatusBadge
+                text={`${reports.length} Reports`}
+                color='teal'
+                count={true}
+              />
             </div>
             <div className='grid grid-cols-2 gap-4 mb-6'>
               <div className='p-4 bg-gray-50 border rounded-lg text-center'>
@@ -220,26 +333,11 @@ const UserDetailsModal = ({
                 <div key={r.id} className='border p-4 rounded-lg bg-gray-50'>
                   <div className='flex justify-between items-start'>
                     <p className='font-semibold text-gray-800'>{r.title}</p>
-                    <span className='inline-flex items-center px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-medium'>
-                      Verified
-                    </span>
+                    <StatusBadge text='Verified' color='green' />
                   </div>
                   <p className='text-gray-600 text-sm my-1'>{r.description}</p>
                   <div className='flex items-center text-xs text-gray-500 mt-2'>
-                    <svg
-                      className='w-4 h-4 mr-1.5 text-gray-400'
-                      fill='none'
-                      stroke='currentColor'
-                      viewBox='0 0 24 24'
-                      xmlns='http://www.w3.org/2000/svg'
-                    >
-                      <path
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                        strokeWidth='2'
-                        d='M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'
-                      ></path>
-                    </svg>
+                    <HiOutlineClock className='w-4 h-4 mr-1.5 text-gray-400' />
                     {r.date}
                   </div>
                 </div>
@@ -252,6 +350,7 @@ const UserDetailsModal = ({
   );
 };
 
+// ... a large portion of the UserManagementPage component remains the same
 const UserManagementPage = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -330,47 +429,64 @@ const UserManagementPage = () => {
   return (
     <div className='flex h-screen bg-gray-50 font-sans'>
       <Sidebar currentRoute={currentRoute} setRoute={setRoute} />
-      <div className='flex-1 p-8 overflow-y-auto'>
-        <h1 className='text-3xl font-bold text-gray-800 mb-1'>
-          User Management
-        </h1>
-        <p className='text-gray-600 mb-6'>Manage and monitor user accounts</p>
+      <div className='bg-gray-50 flex-1 flex flex-col'>
+        <header className='bg-white shadow-sm p-4 border-b border-gray-200'>
+          <div className='flex justify-between items-center'>
+            <h1 className='text-xl font-semibold text-gray-700'>Admin Panel</h1>
+            <button className='flex items-center p-2 rounded-full bg-gray-100 hover:bg-gray-200'>
+              <UserIcon />
+            </button>
+          </div>
+        </header>
+        <main className='p-8 overflow-y-auto'>
+          <div className='mb-8'>
+            <h2 className='text-3xl font-bold text-gray-800'>
+              User Management
+            </h2>
+            <p className='text-gray-500 mt-1'>
+              View and manage all registered users.
+            </p>
+          </div>
 
-        <div className='bg-white shadow rounded-lg overflow-x-auto'>
-          <table className='w-full text-left text-sm'>
-            <thead className='bg-gray-50 text-gray-600 uppercase text-xs'>
-              <tr>
-                <th className='p-4 font-semibold'>Name</th>
-                <th className='p-4 font-semibold'>Email</th>
-                <th className='p-4 font-semibold'>User Type</th>
-                <th className='p-4 font-semibold'>Joined On</th>
-                <th className='p-4 font-semibold'>Actions</th>
-              </tr>
-            </thead>
-            <tbody className='divide-y divide-gray-200'>
-              {users.map((user) => (
-                <tr key={user._id} className='hover:bg-gray-50'>
-                  <td className='p-4 font-medium text-gray-900'>{user.name}</td>
-                  <td className='p-4 text-gray-700'>{user.email}</td>
-                  <td className='p-4'>
-                    <UserTypeBadge type={user.isPaid ? "Paid" : "Free"} />
-                  </td>
-                  <td className='p-4 text-gray-700'>
-                    {new Date(user.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className='p-4'>
-                    <button
-                      onClick={() => fetchUserProfile(user)}
-                      className='px-4 py-1.5 bg-teal-600 text-white rounded-md text-xs font-bold hover:bg-teal-700 transition'
-                    >
-                      View
-                    </button>
-                  </td>
+          <div className='bg-white shadow rounded-lg overflow-x-auto'>
+            <table className='w-full text-left text-sm'>
+              <thead className='bg-gray-50 text-gray-600 uppercase text-xs'>
+                <tr>
+                  <th className='p-4 font-semibold'>Name</th>
+                  <th className='p-4 font-semibold'>Email</th>
+                  <th className='p-4 font-semibold'>User Type</th>
+                  <th className='p-4 font-semibold'>Joined On</th>
+                  <th className='p-4 font-semibold'>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className='divide-y divide-gray-200'>
+                {users.map((user) => (
+                  <tr key={user._id} className='hover:bg-gray-50'>
+                    <td className='p-4 font-medium text-gray-900'>
+                      {user.name}
+                    </td>
+                    <td className='p-4 text-gray-700'>{user.email}</td>
+                    <td className='p-4'>
+                      <UserTypeBadge type={user.isPaid ? "Paid" : "Free"} />
+                    </td>
+                    <td className='p-4 text-gray-700'>
+                      {new Date(user.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className='p-4'>
+                      <button
+                        onClick={() => fetchUserProfile(user)}
+                        className='px-3 py-1 rounded text-sm text-white'
+                        style={{ backgroundColor: "#008080" }} // Teal color
+                      >
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </main>
       </div>
 
       {/* Modal */}
