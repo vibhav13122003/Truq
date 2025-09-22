@@ -44,7 +44,9 @@ To secure your account, please verify your email by using the One-Time Password 
              <p>Your OTP is <b>${otp}</b>. It expires in 5 minutes.</p>
              <p>(Enter this code in the app to complete your verification.)
 If you didn’t sign up for truq, please ignore this email.
+<br/>
 Drive safe,
+<br/>
 The truq Team
 </p>`
         );
@@ -112,7 +114,9 @@ To verify your email and continue, please use the One-Time Password (OTP) below:
       <p>Your OTP for password reset is <b>${otp}</b>. It expires in 10 minutes.</p>
         <p>(Enter this code in the app to reset your password.)
 If you didn’t request a password reset, please ignore this email.
+<br/>
 Drive safe,
+<br/>
 The truq Team
 </p>
     `);

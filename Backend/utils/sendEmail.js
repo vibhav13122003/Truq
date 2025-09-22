@@ -1,12 +1,14 @@
 const nodemailer = require("nodemailer");
 
+console.log("EMAIL USER at runtime:", process.env.EMAIL_USER);
+
 const sendEmail = async (to, subject, html) => {
     try {
         const transporter = nodemailer.createTransport({
-            service: "gmail", // or use "smtp"
+            service: "gmail",
             auth: {
                 user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS,
+                pass: process.env.EMAIL_PASS, 
             },
         });
 
@@ -22,5 +24,7 @@ const sendEmail = async (to, subject, html) => {
         console.error("❌ Email error:", err);
     }
 };
+
+
 
 module.exports = sendEmail;
