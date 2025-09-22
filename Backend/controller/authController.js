@@ -77,8 +77,7 @@ exports.verifyEmail = async (req, res) => {
         if (record.otp !== otp) return res.status(400).json({ msg: "Invalid OTP" });
 
         await User.updateOne({ email }, { isVerified: true });
-        await Otp.deleteMany({ email }); // cleanup
-
+        await Otp.deleteMany({ email });
         res.json({ msg: "Email verified successfully!" });
     } catch (err) {
         res.status(500).json({ msg: "Server error" });
@@ -109,26 +108,49 @@ exports.forgotPassword = async (req, res) => {
         res.status(500).json({ msg: "Server error" });
     }
 };
-
-exports.resetPassword = async (req, res) => {
+exports.verifyResetOtp = async (req, res) => {
     try {
-        const { email, otp, password } = req.body;
-
+        const { email, otp } = req.body;
         const record = await Otp.findOne({ email }).sort({ createdAt: -1 });
+
         if (!record) return res.status(400).json({ msg: "OTP not found" });
         if (record.otpExpire < Date.now()) return res.status(400).json({ msg: "OTP expired" });
         if (record.otp !== otp) return res.status(400).json({ msg: "Invalid OTP" });
 
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
+        
+        await Otp.deleteMany({ email });
 
-        await User.updateOne({ email }, { password: hashedPassword });
-        await Otp.deleteMany({ email }); 
-        res.json({ msg: "Password reset successful" });
+       
+        const resetToken = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "15m" });
+
+        res.json({ msg: "OTP verified, you can now reset password", resetToken });
     } catch (err) {
         res.status(500).json({ msg: "Server error" });
     }
 };
+
+exports.resetPassword = async (req, res) => {
+    try {
+        const { resetToken, password } = req.body;
+
+        // Verify reset token
+        const decoded = jwt.verify(resetToken, process.env.JWT_SECRET);
+        const user = await User.findOne({ email: decoded.email });
+        if (!user) return res.status(400).json({ msg: "User not found" });
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        user.password = hashedPassword;
+        await user.save();
+
+        res.json({ msg: "Password reset successful" });
+    } catch (err) {
+        console.error("Reset error:", err);
+        res.status(500).json({ msg: "Invalid or expired reset token" });
+    }
+};
+
 
 
 
