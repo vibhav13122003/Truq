@@ -385,7 +385,9 @@ const UserManagementPage = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await fetch("https://truq-nzas.vercel.app/api/auth/users");
+        const res = await fetch(
+          "https://stingray-app-moubo.ondigitalocean.app/api/auth/users"
+        );
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const data = await res.json();
         setUsers(Array.isArray(data) ? data : []);
@@ -404,7 +406,7 @@ const UserManagementPage = () => {
     setProfileLoading(true);
     try {
       const res = await fetch(
-        `https://truq-nzas.vercel.app/api/profiles/user/${user._id}`
+        `https://stingray-app-moubo.ondigitalocean.app/api/profiles/user/${user._id}`
       );
       if (!res.ok) throw new Error("Profile not found");
       const profiles = await res.json();

@@ -37,9 +37,16 @@ exports.register = async (req, res) => {
         // Send verification email
         await sendEmail(
             email,
-            "Verify Your Email",
-            `<h2>Welcome ${name}</h2>
-             <p>Your OTP is <b>${otp}</b>. It expires in 5 minutes.</p>`
+            " Verify your truq account to start your safe journey 🚛",
+            `<h2>Hello  ${name}</h2>
+            <p>Welcome to truq! We’re excited to help you discover safe and reliable routes while driving.
+To secure your account, please verify your email by using the One-Time Password (OTP) below:</p>
+             <p>Your OTP is <b>${otp}</b>. It expires in 5 minutes.</p>
+             <p>(Enter this code in the app to complete your verification.)
+If you didn’t sign up for truq, please ignore this email.
+Drive safe,
+The truq Team
+</p>`
         );
 
         // Generate JWT
@@ -48,7 +55,7 @@ exports.register = async (req, res) => {
 
         res.status(201).json({
             msg: "Registration successful, check email for OTP",
-            token,               
+            token,
             user: {
                 id: user._id,
                 name: user.name,
@@ -68,8 +75,7 @@ exports.verifyEmail = async (req, res) => {
 
         const record = await Otp.findOne({ email }).sort({ createdAt: -1 });
         if (!record) return res.status(400).json({ msg: "OTP not found" });
-        if (record.otpExpire < Date.now())
-        {
+        if (record.otpExpire < Date.now()) {
             await User.findOneAndDelete({ email, isVerified: false });
             return res.status(400).json({ msg: "OTP expired" });
 
@@ -98,9 +104,17 @@ exports.forgotPassword = async (req, res) => {
             otpExpire: new Date(Date.now() + 10 * 60 * 1000), // 10 mins
         });
 
-        await sendEmail(email, "Password Reset OTP", `
+        await sendEmail(email, " Reset your truq password 🔑", `
       <h2>Hello ${user.name}</h2>
+        <p>We received a request to reset the password for your truq account.
+To verify your email and continue, please use the One-Time Password (OTP) below:
+</p>
       <p>Your OTP for password reset is <b>${otp}</b>. It expires in 10 minutes.</p>
+        <p>(Enter this code in the app to reset your password.)
+If you didn’t request a password reset, please ignore this email.
+Drive safe,
+The truq Team
+</p>
     `);
 
         res.json({ msg: "OTP sent to email for password reset" });
@@ -117,10 +131,10 @@ exports.verifyResetOtp = async (req, res) => {
         if (record.otpExpire < Date.now()) return res.status(400).json({ msg: "OTP expired" });
         if (record.otp !== otp) return res.status(400).json({ msg: "Invalid OTP" });
 
-        
+
         await Otp.deleteMany({ email });
 
-       
+
         const resetToken = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "15m" });
 
         res.json({ msg: "OTP verified, you can now reset password", resetToken });
@@ -133,7 +147,7 @@ exports.resetPassword = async (req, res) => {
     try {
         const { resetToken, password } = req.body;
 
-       
+
         const decoded = jwt.verify(resetToken, process.env.JWT_SECRET);
         const user = await User.findOne({ email: decoded.email });
         if (!user) return res.status(400).json({ msg: "User not found" });
@@ -177,12 +191,12 @@ exports.login = async (req, res) => {
 
 
 
-exports.getAllUsers=async(req,res)=>{
-    try{
-        const users=await User.find()
+exports.getAllUsers = async (req, res) => {
+    try {
+        const users = await User.find()
         res.json(users);
-    }catch(err){
-        res.status(500).json({msg:"Server error"});
+    } catch (err) {
+        res.status(500).json({ msg: "Server error" });
     }
 }
 // ====================== UPDATE USER ======================
