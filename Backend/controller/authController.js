@@ -133,7 +133,7 @@ exports.resetPassword = async (req, res) => {
     try {
         const { resetToken, password } = req.body;
 
-        // Verify reset token
+       
         const decoded = jwt.verify(resetToken, process.env.JWT_SECRET);
         const user = await User.findOne({ email: decoded.email });
         if (!user) return res.status(400).json({ msg: "User not found" });
