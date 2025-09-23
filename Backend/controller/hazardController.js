@@ -1,5 +1,5 @@
 const Hazard = require('../model/Hazard');
-
+const User = require('../model/User');
 
 exports.createHazard = async (req, res) => {
     try {
@@ -69,8 +69,12 @@ exports.updateHazard = async (req, res) => {
 // Get hazards submitted by a specific user (admin only or with userId param)
 exports.getHazardsByUser = async (req, res) => {
     try {
-        const userId = req.params.userId;
-        const hazards = await Hazard.find({ user: userId }).populate("user", "name email");
+        const {userId} = req.params;
+         const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+        const hazards = await Hazard.find({ user: userId })
 
         if (!hazards || hazards.length === 0) {
             return res.status(404).json({ success: false, message: "No hazards found for this user" });
@@ -84,6 +88,7 @@ exports.getHazardsByUser = async (req, res) => {
 
 
 // Delete Hazard
+// Delete Hazard (no auth check)
 exports.deleteHazard = async (req, res) => {
     try {
         const hazard = await Hazard.findById(req.params.id);
@@ -91,31 +96,48 @@ exports.deleteHazard = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Hazard not found' });
         }
 
-        // allow only owner or admin to delete
-        if (hazard.user.toString() !== req.user.id && !req.user.isAdmin) {
-            return res.status(403).json({ success: false, message: 'Not authorized' });
-        }
-
         await hazard.remove();
         res.status(200).json({ success: true, message: 'Hazard removed' });
     } catch (error) {
+        console.error(error);
         res.status(500).json({ success: false, message: 'Server Error', error: error.message });
     }
 };
 
-// Approve Hazard (Admin only)
+// Approve Hazard (no auth check)
 exports.approveHazard = async (req, res) => {
     try {
         const hazard = await Hazard.findById(req.params.id);
-        if (!hazard) {
-            return res.status(404).json({ success: false, message: 'Hazard not found' });
-        }
+        if (!hazard) return res.status(404).json({ success: false, message: 'Hazard not found' });
+
+        // if (!req.user.isAdmin) return res.status(403).json({ success: false, message: 'Not authorized' });
 
         hazard.isApproved = true;
+        hazard.status = 'Verified'; // use enum value
         await hazard.save();
 
         res.status(200).json({ success: true, message: 'Hazard approved', hazard });
     } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    }
+};
+
+exports.rejectHazard = async (req, res) => {
+    try {
+        const hazard = await Hazard.findById(req.params.id);
+        if (!hazard) return res.status(404).json({ success: false, message: 'Hazard not found' });
+
+
+        // if (!req.user.isAdmin) return res.status(403).json({ success: false, message: 'Not authorized' });
+
+        hazard.isApproved = false;
+        hazard.status = 'Rejected'; // use enum value
+        await hazard.save();
+
+        res.status(200).json({ success: true, message: 'Hazard rejected', hazard });
+    } catch (error) {
+        console.error(error);
         res.status(500).json({ success: false, message: 'Server Error', error: error.message });
     }
 };

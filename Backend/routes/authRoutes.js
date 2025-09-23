@@ -1,7 +1,8 @@
 const express = require("express");
-const { register, login, verifyEmail, forgotPassword, resetPassword,getAllUsers,updateUserProfile,deleteUserProfile,verifyResetOtp} = require("../controller/authController");
+const { register, login, verifyEmail, forgotPassword, resetPassword,getAllUsers,updateUserProfile,deleteUserProfile,verifyResetOtp, adminUpdateUser} = require("../controller/authController");
 const router = express.Router();
 const sendEmail = require("../utils/sendEmail");
+const {protect} = require("../middleware/authMiddleware");
 
 router.post("/register", register);
 router.post("/login", login);
@@ -11,10 +12,7 @@ router.post("/reset-otp", resetPassword);
 router.post("/verify-reset-otp", verifyResetOtp);
 router.get("/users", getAllUsers);
 router.put("/update-profile/:id", updateUserProfile);
-router.delete("/delete-profile/:id", deleteUserProfile);
-router.get("/test-email", async (req, res) => {
-    console.log("✅ Test email route hit");
-    await sendEmail("vibhavbhartiya13@email.com", "Test", "<h1>Hello</h1>");
-    res.send("Email attempted");
-});
+router.delete("/delete-profile/:id", protect,deleteUserProfile);
+router.put("/admin-update-user/:id",protect, adminUpdateUser);
+
 module.exports = router;

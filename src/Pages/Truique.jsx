@@ -1,29 +1,50 @@
-import React, { useState } from "react";
-import Sidebar from "../Components/Sidebar"; // <-- adjust path if needed
+import React, { useState, useEffect, useCallback } from "react";
+import Sidebar from "../Components/Sidebar";
+import { HiOutlineUser } from "react-icons/hi";
 
-import {
-  HiOutlineUsers,
-  HiOutlineUser,
-  HiOutlineUserGroup,
-  HiOutlineExclamationCircle,
-  HiOutlineChevronDown,
-} from "react-icons/hi";
-
-import { RiAlertFill } from "react-icons/ri";
-import { FaCreditCard } from "react-icons/fa6";
-import { FaUserCog, FaClipboardList } from "react-icons/fa";
-
-const UserIcon = () => <HiOutlineUser className='w-5 h-5 text-gray-600' />;
-const DownArrowIcon = () => (
-  <HiOutlineChevronDown className='w-4 h-4 ml-1 text-gray-600' />
-);
-
-const ReportDetailModal = ({ report, onClose, statusColors }) => {
+// --- Modal Component ---
+const ReportDetailModal = ({
+  report,
+  onClose,
+  statusColors,
+  refreshHazards,
+}) => {
   if (!report) return null;
 
-  const handleAction = (action) => {
-    console.log(`${action} clicked for report: ${report.id}`);
-    onClose();
+  const handleAction = async (action) => {
+    try {
+      let url = `https://truq-backend-vfnps.ondigitalocean.app/api/hazards/${report._id}`;
+      let method = "PUT"; // Default method
+
+      if (action === "Approve") {
+        url = `https://truq-backend-vfnps.ondigitalocean.app/api/hazards/${report._id}/approve`;
+      } else if (action === "Delete") {
+        method = "DELETE";
+      }
+      else if (action === "Reject") {
+        url = `https://truq-backend-vfnps.ondigitalocean.app/api/hazards/${report._id}/reject`;
+      }
+
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        // For Reject, we send a specific body. For others, it might be empty.
+        body:
+          action === "Reject"
+            ? JSON.stringify({ isApproved: false })
+            : undefined,
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Action failed");
+
+      alert(`${action} successful!`);
+      refreshHazards(); // Re-fetch the list to show updated data
+      onClose(); // Close the modal
+    } catch (err) {
+      console.error(err);
+      alert(`Failed to ${action}: ${err.message}`);
+    }
   };
 
   return (
@@ -53,7 +74,10 @@ const ReportDetailModal = ({ report, onClose, statusColors }) => {
         <div className='px-6 py-4 grid grid-cols-1 md:grid-cols-2 gap-6'>
           <div className='space-y-3'>
             {[
-              { label: "Date & Time", value: report.datetime },
+              {
+                label: "Date & Time",
+                value: new Date(report.datetime).toLocaleString(),
+              },
               { label: "Location", value: report.location },
               { label: "Reported By", value: report.email },
               { label: "Hazard Type", value: report.hazard },
@@ -78,7 +102,6 @@ const ReportDetailModal = ({ report, onClose, statusColors }) => {
             </div>
           </div>
           <div className='flex items-center justify-center bg-gray-50 rounded-lg'>
-            {/* You can replace this with an actual image if you have one */}
             {report.imageUrl ? (
               <img
                 src={report.imageUrl}
@@ -86,7 +109,7 @@ const ReportDetailModal = ({ report, onClose, statusColors }) => {
                 className='object-cover h-full w-full rounded-lg'
               />
             ) : (
-              <p className='text-gray-400'>Image Placeholder</p>
+              <p className='text-gray-400'>No Image Provided</p>
             )}
           </div>
         </div>
@@ -101,21 +124,21 @@ const ReportDetailModal = ({ report, onClose, statusColors }) => {
         <div className='px-6 py-4 border-t border-gray-200 flex space-x-2'>
           <button
             onClick={() => handleAction("Approve")}
-            className=' hover:bg-green-600 text-white px-4 py-2 rounded text-sm'
+            className='hover:bg-green-600 text-white px-4 py-2 rounded text-sm'
             style={{ backgroundColor: "#22C55E" }}
           >
             Approve
           </button>
           <button
             onClick={() => handleAction("Reject")}
-            className=' hover:bg-red-600 text-white px-4 py-2 rounded text-sm'
+            className='hover:bg-red-600 text-white px-4 py-2 rounded text-sm'
             style={{ backgroundColor: "#EF4444" }}
           >
             Reject
           </button>
           <button
             onClick={() => handleAction("Delete")}
-            className=' hover:bg-teal text-white px-4 py-2 rounded text-sm flex items-center gap-1'
+            className='hover:bg-teal-700 text-white px-4 py-2 rounded text-sm'
             style={{ backgroundColor: "#008080" }}
           >
             Delete
@@ -126,123 +149,75 @@ const ReportDetailModal = ({ report, onClose, statusColors }) => {
   );
 };
 
+// --- Main Page Component ---
 const TruqieReports = () => {
   const [currentRoute, setRoute] = useState("truqie");
   const [selectedReport, setSelectedReport] = useState(null);
+  const [hazards, setHazards] = useState([]);
 
-  // --- DEMO DATA ADDED HERE ---
-  const reports = [
-    {
-      id: "HRT-001",
-      datetime: "2025-09-19 11:45",
-      location: "NH-27, Near Unnao Toll Plaza",
-      email: "driver.one@email.com",
-      hazard: "Accident",
-      vehicles: "All Vehicles",
-      status: "Pending",
-      description:
-        "A multi-car pile-up is blocking two lanes. Traffic is heavily congested. Emergency services are on the scene.",
-      imageUrl: "https://via.placeholder.com/400x300.png?text=Accident+Scene",
-    },
-    {
-      id: "HRT-002",
-      datetime: "2025-09-19 09:15",
-      location: "Lucknow-Agra Expressway, KM 152",
-      email: "trucker.two@email.com",
-      hazard: "Pothole",
-      vehicles: "Trucks, Buses",
-      status: "Verified",
-      description:
-        "There is a very large and deep pothole in the right lane that could cause significant damage to tires and suspension, especially for heavy vehicles.",
-      imageUrl: "https://via.placeholder.com/400x300.png?text=Large+Pothole",
-    },
-    {
-      id: "HRT-003",
-      datetime: "2025-09-18 22:30",
-      location: "Kanpur Bypass Road",
-      email: "driver.three@email.com",
-      hazard: "Roadblock",
-      vehicles: "All Vehicles",
-      status: "Verified",
-      description:
-        "A fallen tree from last night's storm is completely blocking the road. Authorities have been notified.",
-      imageUrl: "https://via.placeholder.com/400x300.png?text=Fallen+Tree",
-    },
-    {
-      id: "HRT-004",
-      datetime: "2025-09-18 17:00",
-      location: "SH-38, Near Bithoor",
-      email: "commuter.four@email.com",
-      hazard: "Water Logging",
-      vehicles: "Cars, Bikes",
-      status: "Rejected",
-      description:
-        "Minor water logging reported after rain, but it has since cleared up and is no longer a hazard.",
-      imageUrl: null,
-    },
-    {
-      id: "HRT-005",
-      datetime: "2025-09-19 15:20",
-      location: "Ganga Barrage, Kanpur",
-      email: "driver.five@email.com",
-      hazard: "Heavy Traffic",
-      vehicles: "All Vehicles",
-      status: "Pending",
-      description:
-        "Unusual traffic jam on the Ganga Barrage bridge heading towards Unnao. Cause is unknown.",
-      imageUrl: "https://via.placeholder.com/400x300.png?text=Traffic+Jam",
-    },
-  ];
-const statusColors = {
-  Pending: "bg-[#F3F4F6] color-[#374151]",   // light gray bg, dark gray text
-  Verified: "bg-[#DCFCE7] color-[#166534]",  // light green bg, darker green text
-  Rejected: "bg-[#FEE2E2] color-[#991B1B]",  // light red bg, darker red text
-};
+  const statusColors = {
+    Pending: "bg-[#F3F4F6] text-[#374151]",
+    Verified: "bg-[#DCFCE7] text-[#166534]",
+    Rejected: "bg-[#FEE2E2] text-[#991B1B]",
+  };
+
+  // ✅ **FIX:** Define fetchHazards outside useEffect, wrapped in useCallback
+  const fetchHazards = useCallback(async () => {
+    try {
+      const res = await fetch(
+        "https://truq-backend-vfnps.ondigitalocean.app/api/hazards"
+      );
+      if (!res.ok) throw new Error("Failed to fetch data");
+
+      const data = await res.json();
+
+      const formatted = data.hazards.map((h, index) => {
+        const year = new Date(h.createdAt).getFullYear();
+     return {
+       ...h,
+       id: `HR-${year}-${String(index + 1).padStart(3, "0")}`,
+       datetime: h.createdAt,
+       location: h.location,
+       email: h.user?.email || "Unknown",
+       hazard: h.hazardClass,
+       vehicles: h.vehicleType,
+       status: h.status, // Directly use the status from the API
+       description: h.description,
+       imageUrl: h.photos?.[0] || null,
+     };
+      });
+
+      setHazards(formatted);
+    } catch (err) {
+      console.error("Error fetching hazards:", err);
+    }
+  }, []); // No dependencies, so it's created only once.
+
+  // ✅ **FIX:** Call the memoized fetchHazards function on component mount
+  useEffect(() => {
+    fetchHazards();
+  }, [fetchHazards]);
 
   return (
     <div className='flex h-screen'>
-      {/* Sidebar */}
       <Sidebar currentRoute={currentRoute} setRoute={setRoute} />
 
-      {/* Main content */}
       <div className='bg-gray-50 flex-1 flex flex-col'>
-        {/* Header */}
-        <header className='bg-white shadow-sm p-4 border-b border-gray-200'>
-          <div className='flex justify-between items-center'>
-            <h1 className='text-xl font-semibold text-gray-700'>Admin Panel</h1>
-            <button className='flex items-center p-2 rounded-full bg-gray-100 hover:bg-gray-200'>
-              <UserIcon />
-            </button>
-          </div>
+        <header className='bg-white shadow-sm p-4 border-b border-gray-200 flex justify-between items-center'>
+          <h1 className='text-xl font-semibold text-gray-700'>Admin Panel</h1>
+          <button className='flex items-center p-2 rounded-full bg-gray-100 hover:bg-gray-200'>
+            <HiOutlineUser className='w-5 h-5 text-gray-600' />
+          </button>
         </header>
 
         <main className='p-8 overflow-y-auto'>
-          {/* Filters */}
-          <div className='mb-8'>
-            <h2 className='text-3xl font-bold text-gray-800'>Truqie Reports</h2>
-            <p className='text-gray-500 mt-1'>
-              Manage and moderate reports by the drivers
-            </p>
-          </div>
+          <h2 className='text-3xl font-bold text-gray-800 mb-2'>
+            Truqie Reports
+          </h2>
+          <p className='text-gray-500 mb-6'>
+            Manage and moderate reports by the drivers
+          </p>
 
-          <div className='flex flex-wrap items-center gap-2 mb-6'>
-            <select className='border border-gray-300 rounded px-3 py-2 text-sm'>
-              <option>All Status</option>
-              <option>Pending</option>
-              <option>Verified</option>
-              <option>Rejected</option>
-            </select>
-            <input
-              type='text'
-              placeholder='Search by location, type, or ID...'
-              className='flex-1 border border-gray-300 rounded px-3 py-2 text-sm'
-            />
-            <button className='px-4 py-2 text-sm bg-gray-100 rounded hover:bg-gray-200'>
-              Clear Filters
-            </button>
-          </div>
-
-          {/* Reports Table */}
           <div className='bg-white rounded-lg shadow-md overflow-x-auto mb-6'>
             <table className='min-w-full text-sm text-gray-600'>
               <thead className='bg-gray-50 text-xs text-gray-700 uppercase tracking-wider'>
@@ -264,18 +239,18 @@ const statusColors = {
                 </tr>
               </thead>
               <tbody>
-                {reports.map((r) => (
+                {hazards.map((r) => (
                   <tr
                     key={r.id}
                     className='border-b last:border-none hover:bg-gray-50'
                   >
                     <td className='p-4'>{r.id}</td>
-                    <td className='p-4'>{r.datetime}</td>
+                    <td className='p-4'>
+                      {new Date(r.datetime).toLocaleString()}
+                    </td>
                     <td className='p-4'>{r.location}</td>
                     <td className='p-4'>{r.email}</td>
-                    <td className='p-4 flex items-center gap-1'>
-                      <span className='text-yellow-500'>⚠️</span> {r.hazard}
-                    </td>
+                    <td className='p-4'>⚠️ {r.hazard}</td>
                     <td className='p-4'>{r.vehicles}</td>
                     <td className='p-4'>
                       <span
@@ -300,39 +275,16 @@ const statusColors = {
               </tbody>
             </table>
           </div>
-
-          {/* Status Legend */}
-          <div className='bg-white p-6 rounded-lg shadow-md mb-6 text-sm'>
-            <h3 className='font-semibold mb-2'>Status Legend</h3>
-            <div className='flex flex-wrap gap-4 text-gray-600'>
-              <span>
-                <span className='px-2 py-1 bg-gray-200 rounded text-xs'>
-                  Pending
-                </span>{" "}
-                Awaiting review
-              </span>
-              <span>
-                <span className='px-2 py-1 bg-green-100 rounded text-xs'>
-                  Verified
-                </span>{" "}
-                Confirmed hazard
-              </span>
-              <span>
-                <span className='px-2 py-1 bg-red-100 rounded text-xs'>
-                  Rejected
-                </span>{" "}
-                Invalid or resolved
-              </span>
-            </div>
-          </div>
         </main>
       </div>
 
+      {/* ✅ **FIX:** This now works because fetchHazards is in scope */}
       {selectedReport && (
         <ReportDetailModal
           report={selectedReport}
           onClose={() => setSelectedReport(null)}
           statusColors={statusColors}
+          refreshHazards={fetchHazards}
         />
       )}
     </div>

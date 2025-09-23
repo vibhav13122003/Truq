@@ -294,18 +294,50 @@ const UserDetailsModal = ({
           </div>
 
           {/* User Submitted Reports Section (Kept for completeness) */}
+          {/* User Submitted Reports Section */}
           <section>
             <h3 className='text-base font-semibold text-gray-800 mb-4'>
-              User Submitted Hazard Reports
+              User Submitted Reports
             </h3>
 
-            <div className='flex justify-between items-center mb-4'>
-              <p className='text-gray-600 text-sm'>Recent Hazards Submitted</p>
+            {/* Summary Cards */}
+            <div className='flex items-center justify-between mb-6'>
+              <div className='grid grid-cols-2 gap-4 w-full max-w-md'>
+                <div className='p-4 border rounded-lg bg-gray-50'>
+                  <p className='text-sm text-gray-500'>This Month</p>
+                  <p className='text-2xl font-bold text-gray-800'>
+                    {
+                      reports.filter(
+                        (r) =>
+                          new Date(r.createdAt).getMonth() ===
+                            new Date().getMonth() &&
+                          new Date(r.createdAt).getFullYear() ===
+                            new Date().getFullYear()
+                      ).length
+                    }
+                  </p>
+                </div>
+                <div className='p-4 border rounded-lg bg-gray-50'>
+                  <p className='text-sm text-gray-500'>Total Reports</p>
+                  <p className='text-2xl font-bold text-gray-800'>
+                    {reports.length}
+                  </p>
+                </div>
+              </div>
+
               <StatusBadge
                 text={`${reports.length} Reports`}
                 color='teal'
                 count={true}
               />
+            </div>
+
+            {/* Latest Reports */}
+            <div className='flex justify-between items-center mb-4'>
+              <p className='text-gray-600 text-sm'>Latest Reports</p>
+              <button className='text-sm font-medium text-teal-600 hover:underline'>
+                View All
+              </button>
             </div>
 
             {reports.length > 0 ? (
@@ -317,7 +349,7 @@ const UserDetailsModal = ({
                         {r.hazardClass || "Hazard Report"}
                       </p>
                       <StatusBadge
-                        text={r.approved ? "Approved" : "Pending"}
+                        text={r.approved ? "Verified" : "Pending Review"}
                         color={r.approved ? "green" : "teal"}
                       />
                     </div>
@@ -326,7 +358,11 @@ const UserDetailsModal = ({
                     </p>
                     <div className='flex items-center text-xs text-gray-500 mt-2'>
                       <HiOutlineClock className='w-4 h-4 mr-1.5 text-gray-400' />
-                      {new Date(r.createdAt).toLocaleDateString()}
+                      {new Date(r.createdAt).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
                     </div>
                   </div>
                 ))}
@@ -376,24 +412,32 @@ const UserManagementPage = () => {
     },
   ];
   
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const res = await fetch(
-          "https://truq-backend-vfnps.ondigitalocean.app/api/auth/users"
-        );
-        if (!res.ok) throw new Error(`Error: ${res.status}`);
-        const data = await res.json();
-        setUsers(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error("Error fetching users:", err);
-        setUsers([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUsers();
-  }, []);
+ useEffect(() => {
+   const fetchUsers = async () => {
+     try {
+       const res = await fetch(
+         "https://truq-backend-vfnps.ondigitalocean.app/api/auth/users"
+       );
+       if (!res.ok) throw new Error(`Error: ${res.status}`);
+       const data = await res.json();
+
+       // Filter out the support email
+       const filteredUsers = Array.isArray(data)
+         ? data.filter((user) => user.email !== "support@truq.com.au")
+         : [];
+
+       setUsers(filteredUsers);
+     } catch (err) {
+       console.error("Error fetching users:", err);
+       setUsers([]);
+     } finally {
+       setLoading(false);
+     }
+   };
+
+   fetchUsers();
+ }, []);
+
 
 
  // Fetch user profiles + hazards
@@ -414,7 +458,7 @@ const UserManagementPage = () => {
      const hazards = reportsRes.ok ? await reportsRes.json() : [];
 
      setSelectedProfile(profiles);
-     setSelectedReports(hazards.hazards || []); // depends on backend response shape
+     setSelectedReports(hazards.hazards || []); 
    } catch (err) {
      console.error("Error fetching user data:", err);
      setSelectedProfile([]);

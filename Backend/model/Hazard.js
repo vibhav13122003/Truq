@@ -35,7 +35,7 @@ const HazardSchema = new Schema({
     ],
     status: {
         type: String,
-        enum: ['New', 'Completed', 'In Progress'],
+        enum: ['Pending', 'Verified', 'Rejected'],
         default: 'Pending'
     },
     isApproved: {

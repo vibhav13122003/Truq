@@ -187,7 +187,7 @@ exports.login = async (req, res) => {
         });
 
         res.cookie("token", token, { httpOnly: true });
-        res.json({ msg: "Login successful", token });
+        res.json({ msg: "Login successful", token, userId: user._id });
     } catch (err) {
         res.status(500).json({ msg: "Server error" });
     }
@@ -256,6 +256,44 @@ exports.deleteUserProfile = async (req, res) => {
         res.json({ msg: "User deleted successfully" });
     } catch (err) {
         console.error("Delete error:", err);
+        res.status(500).json({ msg: "Server error" });
+    }
+};
+
+
+//////////////////////////////////////
+
+exports.adminUpdateUser = async (req, res) => {
+    try {
+        // The ID in the URL is the user being updated
+        const userId = req.params.id;
+        const { name, password } = req.body;
+
+        // Find the target user
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ msg: "User not found" });
+        }
+
+        // Update fields if provided
+        if (name) user.name = name;
+        if (password) {
+            const salt = await bcrypt.genSalt(10);
+            user.password = await bcrypt.hash(password, salt);
+        }
+
+        await user.save();
+
+        res.json({
+            msg: "User updated successfully by admin",
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+            },
+        });
+    } catch (err) {
+        console.error("Admin update error:", err);
         res.status(500).json({ msg: "Server error" });
     }
 };

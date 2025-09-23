@@ -2,23 +2,18 @@ const express = require('express');
 const router = express.Router();
 const hazardController = require('../controller/hazardController');
 
-// Middleware (example: check authentication & admin)
-const { protect, isAdmin } = require('../middleware/authMiddleware');
+
+router.post('/', hazardController.createHazard);
+
+router.get('/', hazardController.getHazards);
+router.get('/:id', hazardController.getHazardById);
 
 
-router.post('/', protect, hazardController.createHazard);
+router.put('/:id', hazardController.updateHazard);
+router.put('/:id/approve', hazardController.approveHazard);
+router.put('/:id/reject', hazardController.rejectHazard);
+router.delete('/:id', hazardController.deleteHazard);
 
-
-router.get('/', protect, hazardController.getHazards);
-
-router.get('/:id', protect, hazardController.getHazardById);
-
-router.put('/:id', protect, hazardController.updateHazard);
-
-router.delete('/:id', protect, hazardController.deleteHazard);
-
-// Approve hazard (admin only)
-router.put('/:id/approve', protect, hazardController.approveHazard);
-router.get('/user/:userId', protect, hazardController.getHazardsByUser);
+router.get('/user/:userId', hazardController.getHazardsByUser);
 
 module.exports = router;
