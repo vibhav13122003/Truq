@@ -19,5 +19,6 @@ router.delete('/:id', protect, hazardController.deleteHazard);
 
 // Approve hazard (admin only)
 router.put('/:id/approve', protect, hazardController.approveHazard);
+router.get('/user/:userId', protect, hazardController.getHazardsByUser);
 
 module.exports = router;

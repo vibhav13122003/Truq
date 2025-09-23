@@ -28,7 +28,7 @@ const LoginPage = () => {
     setLoading(true);
     try {
       const res = await fetch(
-        "https://stingray-app-moubo.ondigitalocean.app/api/auth/login",
+        "https://truq-backend-vfnps.ondigitalocean.app/api/auth/login",
         {
           method: "POST",
           headers: {

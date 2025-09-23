@@ -296,53 +296,44 @@ const UserDetailsModal = ({
           {/* User Submitted Reports Section (Kept for completeness) */}
           <section>
             <h3 className='text-base font-semibold text-gray-800 mb-4'>
-              User Submitted Reports
+              User Submitted Hazard Reports
             </h3>
+
             <div className='flex justify-between items-center mb-4'>
-              <p className='text-gray-600 text-sm'>Recent Reports Submitted</p>
+              <p className='text-gray-600 text-sm'>Recent Hazards Submitted</p>
               <StatusBadge
                 text={`${reports.length} Reports`}
                 color='teal'
                 count={true}
               />
             </div>
-            <div className='grid grid-cols-2 gap-4 mb-6'>
-              <div className='p-4 bg-gray-50 border rounded-lg text-center'>
-                <p className='text-2xl font-bold text-gray-900'>
-                  {reports.filter((r) => r.isRecent).length}
-                </p>
-                <p className='text-sm text-gray-600'>This Month</p>
-              </div>
-              <div className='p-4 bg-gray-50 border rounded-lg text-center'>
-                <p className='text-2xl font-bold text-gray-900'>
-                  {reports.length}
-                </p>
-                <p className='text-sm text-gray-600'>Total Reports</p>
-              </div>
-            </div>
 
-            <div className='flex justify-between items-center mb-3'>
-              <h4 className='text-gray-700 font-medium'>Latest Reports</h4>
-              <span className='text-red-600 text-sm font-medium cursor-pointer'>
-                View All
-              </span>
-            </div>
-
-            <div className='space-y-3'>
-              {reports.slice(0, 2).map((r) => (
-                <div key={r.id} className='border p-4 rounded-lg bg-gray-50'>
-                  <div className='flex justify-between items-start'>
-                    <p className='font-semibold text-gray-800'>{r.title}</p>
-                    <StatusBadge text='Verified' color='green' />
+            {reports.length > 0 ? (
+              <div className='space-y-3'>
+                {reports.slice(0, 3).map((r) => (
+                  <div key={r._id} className='border p-4 rounded-lg bg-gray-50'>
+                    <div className='flex justify-between items-start'>
+                      <p className='font-semibold text-gray-800'>
+                        {r.hazardClass || "Hazard Report"}
+                      </p>
+                      <StatusBadge
+                        text={r.approved ? "Approved" : "Pending"}
+                        color={r.approved ? "green" : "teal"}
+                      />
+                    </div>
+                    <p className='text-gray-600 text-sm my-1'>
+                      {r.description}
+                    </p>
+                    <div className='flex items-center text-xs text-gray-500 mt-2'>
+                      <HiOutlineClock className='w-4 h-4 mr-1.5 text-gray-400' />
+                      {new Date(r.createdAt).toLocaleDateString()}
+                    </div>
                   </div>
-                  <p className='text-gray-600 text-sm my-1'>{r.description}</p>
-                  <div className='flex items-center text-xs text-gray-500 mt-2'>
-                    <HiOutlineClock className='w-4 h-4 mr-1.5 text-gray-400' />
-                    {r.date}
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <p className='text-gray-500'>No hazard reports found.</p>
+            )}
           </section>
         </div>
       </div>
@@ -358,6 +349,8 @@ const UserManagementPage = () => {
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [profileLoading, setProfileLoading] = useState(false);
   const [currentRoute, setRoute] = useState("userManagement");
+   const [selectedReports, setSelectedReports] = useState([]);
+
 
   const mockReports = [
     {
@@ -382,11 +375,12 @@ const UserManagementPage = () => {
       isRecent: false,
     },
   ];
+  
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         const res = await fetch(
-          "https://stingray-app-moubo.ondigitalocean.app/api/auth/users"
+          "https://truq-backend-vfnps.ondigitalocean.app/api/auth/users"
         );
         if (!res.ok) throw new Error(`Error: ${res.status}`);
         const data = await res.json();
@@ -401,23 +395,35 @@ const UserManagementPage = () => {
     fetchUsers();
   }, []);
 
-  const fetchUserProfile = async (user) => {
-    setSelectedUser(user);
-    setProfileLoading(true);
-    try {
-      const res = await fetch(
-        `https://stingray-app-moubo.ondigitalocean.app/api/profiles/user/${user._id}`
-      );
-      if (!res.ok) throw new Error("Profile not found");
-      const profiles = await res.json();
-      setSelectedProfile(profiles);
-    } catch (err) {
-      console.error("Error fetching profile:", err);
-      setSelectedProfile([]);
-    } finally {
-      setProfileLoading(false);
-    }
-  };
+
+ // Fetch user profiles + hazards
+ const fetchUserProfile = async (user) => {
+   setSelectedUser(user);
+   setProfileLoading(true);
+   try {
+     // Fetch profiles
+     const profileRes = await fetch(
+       `https://truq-backend-vfnps.ondigitalocean.app/api/profiles/user/${user._id}`
+     );
+     const profiles = profileRes.ok ? await profileRes.json() : [];
+
+     // Fetch hazard reports
+     const reportsRes = await fetch(
+       `https://truq-backend-vfnps.ondigitalocean.app/api/hazards/user/${user._id}`
+     );
+     const hazards = reportsRes.ok ? await reportsRes.json() : [];
+
+     setSelectedProfile(profiles);
+     setSelectedReports(hazards.hazards || []); // depends on backend response shape
+   } catch (err) {
+     console.error("Error fetching user data:", err);
+     setSelectedProfile([]);
+     setSelectedReports([]);
+   } finally {
+     setProfileLoading(false);
+   }
+ };
+
 
   if (loading) {
     return (
@@ -496,11 +502,12 @@ const UserManagementPage = () => {
         <UserDetailsModal
           user={selectedUser}
           profile={selectedProfile}
-          reports={mockReports}
+          reports={selectedReports} // ✅ now hazards come from backend
           loading={profileLoading}
           onClose={() => {
             setSelectedUser(null);
             setSelectedProfile(null);
+            setSelectedReports([]);
           }}
         />
       )}

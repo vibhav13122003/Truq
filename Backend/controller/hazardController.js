@@ -66,6 +66,22 @@ exports.updateHazard = async (req, res) => {
         res.status(500).json({ success: false, message: 'Server Error', error: error.message });
     }
 };
+// Get hazards submitted by a specific user (admin only or with userId param)
+exports.getHazardsByUser = async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const hazards = await Hazard.find({ user: userId }).populate("user", "name email");
+
+        if (!hazards || hazards.length === 0) {
+            return res.status(404).json({ success: false, message: "No hazards found for this user" });
+        }
+
+        res.status(200).json({ success: true, hazards });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server Error", error: error.message });
+    }
+};
+
 
 // Delete Hazard
 exports.deleteHazard = async (req, res) => {
