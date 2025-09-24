@@ -172,6 +172,38 @@ const getProfilesByUserId = async (req, res) => {
         res.status(500).json({ message: "Error fetching profiles", error: error.message });
     }
 };
+const activateProfile = async (req, res) => {
+    try {
+        const { profileId } = req.params;
+        const userId = req.user.id; // assuming you’re using auth middleware that attaches user to req
+
+        // 1. Check if profile exists and belongs to this user
+        const profile = await Profile.findOne({ _id: profileId, user: userId });
+        if (!profile) {
+            return res.status(404).json({ success: false, message: "Profile not found for this user" });
+        }
+
+        // 2. Deactivate all profiles of this user
+        await Profile.updateMany(
+            { user: userId },
+            { $set: { isActive: false } }
+        );
+
+        // 3. Activate the chosen profile
+        profile.isActive = true;
+        await profile.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Profile activated successfully",
+            activeProfile: profile
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+};
 
 
 module.exports = {
@@ -184,4 +216,5 @@ module.exports = {
     addTrailer,
     updateTrailer,
     deleteTrailer,
+    activateProfile
 };

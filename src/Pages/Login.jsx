@@ -46,7 +46,18 @@ const LoginPage = () => {
       if (data.token) {
         localStorage.setItem("token", data.token);
       }
-      localStorage.setItem("userId", data.userId);
+     if (data.token) {
+  localStorage.setItem("token", data.token);
+}
+if (data.userId) {
+  localStorage.setItem("userId", data.userId);
+}
+if (data.name) {
+  localStorage.setItem("name", data.name);
+}
+if (data.email) {
+  localStorage.setItem("email", data.email);
+}
       navigate("/dashboard");
     } catch (err) {
       setError(err.message);
@@ -131,7 +142,7 @@ const LoginPage = () => {
             <button
               type='submit'
               disabled={loading}
-              className='w-full bg-teal-700 text-white font-bold py-3 px-4 rounded-lg hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-700 transition duration-300 disabled:bg-teal-400 disabled:cursor-not-allowed'
+              className='w-full bg-gradient-to-b from-[#008080] to-[#004040] text-white font-bold py-3 px-4 rounded-lg hover:bg-teal-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-700 transition duration-300 disabled:bg-teal-400 disabled:cursor-not-allowed'
             >
               {loading ? "Logging in..." : "Login"}
             </button>

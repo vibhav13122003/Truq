@@ -187,7 +187,7 @@ exports.login = async (req, res) => {
         });
 
         res.cookie("token", token, { httpOnly: true });
-        res.json({ msg: "Login successful", token, userId: user._id });
+        res.json({ msg: "Login successful", token, userId: user._id, name: user.name, email: user.email });
     } catch (err) {
         res.status(500).json({ msg: "Server error" });
     }

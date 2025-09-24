@@ -8,7 +8,8 @@ const {
     addTrailer,
     updateTrailer,
     deleteTrailer,
-    getProfilesByUserId
+    getProfilesByUserId,
+    activateProfile
 } = require("../controller/profileController");
 
 const router = express.Router();
@@ -24,5 +25,6 @@ router.post("/:profileId/trailers", protect, addTrailer);
 router.put("/:profileId/trailers/:trailerId", protect, updateTrailer);
 router.delete("/:profileId/trailers/:trailerId", protect, deleteTrailer);
 router.get("/user/:userId", getProfilesByUserId);
+router.put("/activate/:profileId", protect, activateProfile);   
 
 module.exports = router;

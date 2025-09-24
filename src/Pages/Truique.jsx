@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Sidebar from "../Components/Sidebar";
 import { HiOutlineUser } from "react-icons/hi";
-
+import { HiCheck, HiX, HiTrash } from "react-icons/hi";
 // --- Modal Component ---
 const ReportDetailModal = ({
   report,
@@ -93,7 +93,7 @@ const ReportDetailModal = ({
             <div>
               <p className='text-xs text-gray-500'>Status</p>
               <span
-                className={`px-2 py-1 text-xs font-medium rounded ${
+                className={`px-2 py-1 text-xs font-medium rounded-full ${
                   statusColors[report.status]
                 }`}
               >
@@ -121,26 +121,31 @@ const ReportDetailModal = ({
         </div>
 
         {/* Footer Actions */}
-        <div className='px-6 py-4 border-t border-gray-200 flex space-x-2'>
+        <div className='px-6 py-4 border-t border-gray-200 flex space-x-2 w-full justify-between'>
           <button
             onClick={() => handleAction("Approve")}
-            className='hover:bg-green-600 text-white px-4 py-2 rounded text-sm'
+            className='hover:bg-green-600 text-white px-4 py-2 rounded text-sm w-1/3 flex items-center justify-center gap-2'
             style={{ backgroundColor: "#22C55E" }}
           >
+            <HiCheck className='w-5 h-5' />
             Approve
           </button>
+
           <button
             onClick={() => handleAction("Reject")}
-            className='hover:bg-red-600 text-white px-4 py-2 rounded text-sm'
+            className='hover:bg-red-600 text-white px-4 py-2 rounded text-sm w-1/3 flex items-center justify-center gap-2'
             style={{ backgroundColor: "#EF4444" }}
           >
+            <HiX className='w-5 h-5' />
             Reject
           </button>
+
           <button
             onClick={() => handleAction("Delete")}
-            className='hover:bg-teal-700 text-white px-4 py-2 rounded text-sm'
+            className='hover:bg-teal-700 text-white px-4 py-2 rounded text-sm w-1/3 flex items-center justify-center gap-2'
             style={{ backgroundColor: "#008080" }}
           >
+            <HiTrash className='w-5 h-5' />
             Delete
           </button>
         </div>
@@ -149,6 +154,9 @@ const ReportDetailModal = ({
   );
 };
 
+const UsersIcon = () => (
+  <HiOutlineUser className='w-6 h-6' />
+);
 // --- Main Page Component ---
 const TruqieReports = () => {
   const [currentRoute, setRoute] = useState("truqie");
@@ -205,8 +213,8 @@ const TruqieReports = () => {
       <div className='bg-gray-50 flex-1 flex flex-col'>
         <header className='bg-white shadow-sm p-4 border-b border-gray-200 flex justify-between items-center'>
           <h1 className='text-xl font-semibold text-gray-700'>Admin Panel</h1>
-          <button className='flex items-center p-2 rounded-full bg-gray-100 hover:bg-gray-200'>
-            <HiOutlineUser className='w-5 h-5 text-gray-600' />
+          <button className='flex items-center p-2 rounded-full bg-gradient-to-b from-[#008080] to-[#004040] hover:bg-teal-700 text-white'>
+            <UsersIcon />
           </button>
         </header>
 
@@ -254,7 +262,7 @@ const TruqieReports = () => {
                     <td className='p-4'>{r.vehicles}</td>
                     <td className='p-4'>
                       <span
-                        className={`px-2 py-1 text-xs rounded ${
+                        className={`px-2 py-1 text-xs rounded-full ${
                           statusColors[r.status]
                         }`}
                       >
@@ -264,8 +272,7 @@ const TruqieReports = () => {
                     <td className='p-4'>
                       <button
                         onClick={() => setSelectedReport(r)}
-                        className='px-3 py-1 rounded text-sm text-white'
-                        style={{ backgroundColor: "#008080" }}
+                        className='px-3 py-1 rounded text-sm text-white bg-gradient-to-b from-[#008080] to-[#004040]'
                       >
                         View
                       </button>

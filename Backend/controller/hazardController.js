@@ -3,10 +3,13 @@ const User = require('../model/User');
 
 exports.createHazard = async (req, res) => {
     try {
-        const { hazardClass, description, vehicleType, location, photos } = req.body;
+        const { hazardClass, description, vehicleType, location } = req.body;
+
+        // URLs from Spaces
+        const photos = req.files.map(file => file.location);
 
         const hazard = new Hazard({
-            user: req.user.id, 
+            user: req.user.id,
             hazardClass,
             description,
             vehicleType,
@@ -16,12 +19,11 @@ exports.createHazard = async (req, res) => {
 
         await hazard.save();
         res.status(201).json({ success: true, hazard });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: err.message });
     }
 };
-
 // Get All Hazards
 exports.getHazards = async (req, res) => {
     try {

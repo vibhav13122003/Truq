@@ -133,7 +133,7 @@ const DashboardPage = () => {
         <header className='bg-white shadow-sm p-4 border-b border-gray-200'>
           <div className='flex justify-between items-center'>
             <h1 className='text-xl font-semibold text-gray-700'>Admin Panel</h1>
-            <button className='flex items-center p-2 rounded-full bg-gray-100 hover:bg-gray-200'>
+            <button className='flex items-center p-2 rounded-full bg-gradient-to-b from-[#008080] to-[#004040] hover:bg-teal-700 text-white'>
               <UserIcon />
             </button>
           </div>
@@ -184,10 +184,7 @@ const DashboardPage = () => {
               </table>
             </div>
             <div className='mt-6'>
-              <button
-                className='  text-white font-bold py-2 px-5 rounded-lg hover:bg-teal-700 transition duration-300'
-                style={{ backgroundColor: "#008080" }}
-              >
+              <button className='  text-white font-bold py-2 px-5 bg-gradient-to-b from-[#008080] to-[#004040] rounded-lg hover:bg-teal-700 transition duration-300'>
                 View All Reports
               </button>
             </div>

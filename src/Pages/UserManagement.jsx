@@ -12,7 +12,9 @@ import { RiAlertFill } from "react-icons/ri";
 import { FaCreditCard } from "react-icons/fa6";
 import { FaUserCog, FaClipboardList } from "react-icons/fa";
 
-const UserIcon = () => <HiOutlineUser className='w-5 h-5 text-gray-600' />;
+const UserIcon = () => (
+  <HiOutlineUser className='w-6 h-6' />
+);
 
 const UserTypeBadge = ({ type }) => (
   <span
@@ -385,8 +387,11 @@ const UserManagementPage = () => {
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [profileLoading, setProfileLoading] = useState(false);
   const [currentRoute, setRoute] = useState("userManagement");
-   const [selectedReports, setSelectedReports] = useState([]);
-
+  const [selectedReports, setSelectedReports] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [statusFilter, setStatusFilter] = useState(""); // Paid/Free
+  const [userTypeFilter, setUserTypeFilter] = useState(""); // any other type if exists
+   const [searchTerm, setSearchTerm] = useState("");
 
   const mockReports = [
     {
@@ -411,63 +416,90 @@ const UserManagementPage = () => {
       isRecent: false,
     },
   ];
-  
- useEffect(() => {
-   const fetchUsers = async () => {
-     try {
-       const res = await fetch(
-         "https://truq-backend-vfnps.ondigitalocean.app/api/auth/users"
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const res = await fetch(
+          "https://truq-backend-vfnps.ondigitalocean.app/api/auth/users"
+        );
+        if (!res.ok) throw new Error(`Error: ${res.status}`);
+        const data = await res.json();
+
+        // Filter out the support email
+        const filteredUsers = Array.isArray(data)
+          ? data.filter((user) => user.email !== "support@truq.com.au")
+          : [];
+
+        setUsers(filteredUsers);
+      } catch (err) {
+        console.error("Error fetching users:", err);
+        setUsers([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+   useEffect(() => {
+     let tempUsers = [...users];
+
+     if (statusFilter) {
+       tempUsers = tempUsers.filter((u) =>
+         statusFilter === "Paid" ? u.isPaid : !u.isPaid
        );
-       if (!res.ok) throw new Error(`Error: ${res.status}`);
-       const data = await res.json();
-
-       // Filter out the support email
-       const filteredUsers = Array.isArray(data)
-         ? data.filter((user) => user.email !== "support@truq.com.au")
-         : [];
-
-       setUsers(filteredUsers);
-     } catch (err) {
-       console.error("Error fetching users:", err);
-       setUsers([]);
-     } finally {
-       setLoading(false);
      }
+
+     if (userTypeFilter) {
+       tempUsers = tempUsers.filter((u) => u.userType === userTypeFilter);
+     }
+
+     if (searchTerm) {
+       tempUsers = tempUsers.filter(
+         (u) =>
+           u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           (u.phone && u.phone.includes(searchTerm))
+       );
+     }
+
+     setFilteredUsers(tempUsers);
+   }, [statusFilter, userTypeFilter, searchTerm, users]);
+
+   const handleResetFilters = () => {
+     setStatusFilter("");
+     setUserTypeFilter("");
+     setSearchTerm("");
    };
 
-   fetchUsers();
- }, []);
+  // Fetch user profiles + hazards
+  const fetchUserProfile = async (user) => {
+    setSelectedUser(user);
+    setProfileLoading(true);
+    try {
+      // Fetch profiles
+      const profileRes = await fetch(
+        `https://truq-backend-vfnps.ondigitalocean.app/api/profiles/user/${user._id}`
+      );
+      const profiles = profileRes.ok ? await profileRes.json() : [];
 
+      // Fetch hazard reports
+      const reportsRes = await fetch(
+        `https://truq-backend-vfnps.ondigitalocean.app/api/hazards/user/${user._id}`
+      );
+      const hazards = reportsRes.ok ? await reportsRes.json() : [];
 
-
- // Fetch user profiles + hazards
- const fetchUserProfile = async (user) => {
-   setSelectedUser(user);
-   setProfileLoading(true);
-   try {
-     // Fetch profiles
-     const profileRes = await fetch(
-       `https://truq-backend-vfnps.ondigitalocean.app/api/profiles/user/${user._id}`
-     );
-     const profiles = profileRes.ok ? await profileRes.json() : [];
-
-     // Fetch hazard reports
-     const reportsRes = await fetch(
-       `https://truq-backend-vfnps.ondigitalocean.app/api/hazards/user/${user._id}`
-     );
-     const hazards = reportsRes.ok ? await reportsRes.json() : [];
-
-     setSelectedProfile(profiles);
-     setSelectedReports(hazards.hazards || []); 
-   } catch (err) {
-     console.error("Error fetching user data:", err);
-     setSelectedProfile([]);
-     setSelectedReports([]);
-   } finally {
-     setProfileLoading(false);
-   }
- };
-
+      setSelectedProfile(profiles);
+      setSelectedReports(hazards.hazards || []);
+    } catch (err) {
+      console.error("Error fetching user data:", err);
+      setSelectedProfile([]);
+      setSelectedReports([]);
+    } finally {
+      setProfileLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -478,85 +510,119 @@ const UserManagementPage = () => {
     );
   }
 
-  return (
-    <div className='flex h-screen bg-gray-50 font-sans'>
-      <Sidebar currentRoute={currentRoute} setRoute={setRoute} />
-      <div className='bg-gray-50 flex-1 flex flex-col'>
-        <header className='bg-white shadow-sm p-4 border-b border-gray-200'>
-          <div className='flex justify-between items-center'>
-            <h1 className='text-xl font-semibold text-gray-700'>Admin Panel</h1>
-            <button className='flex items-center p-2 rounded-full bg-gray-100 hover:bg-gray-200'>
-              <UserIcon />
-            </button>
-          </div>
-        </header>
-        <main className='p-8 overflow-y-auto'>
-          <div className='mb-8'>
-            <h2 className='text-3xl font-bold text-gray-800'>
-              User Management
-            </h2>
-            <p className='text-gray-500 mt-1'>
-              View and manage all registered users.
-            </p>
-          </div>
+   return (
+     <div className='flex h-screen bg-gray-50 font-sans'>
+       <Sidebar currentRoute={currentRoute} setRoute={setRoute} />
+       <div className='bg-gray-50 flex-1 flex flex-col'>
+         <header className='bg-white shadow-sm p-4 border-b border-gray-200'>
+           <div className='flex justify-between items-center'>
+             <h1 className='text-xl font-semibold text-gray-700'>
+               Admin Panel
+             </h1>
+             <button className='flex items-center p-2 rounded-full bg-gradient-to-b text-white from-[#008080] to-[#004040] hover:bg-teal-700'>
+               <HiOutlineUser className='w-6 h-6' />
+             </button>
+           </div>
+         </header>
+         <main className='p-8 overflow-y-auto'>
+           <div className='mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
+             <div className='flex gap-2'>
+               <select
+                 value={statusFilter}
+                 onChange={(e) => setStatusFilter(e.target.value)}
+                 className='border rounded px-3 py-1 text-sm'
+               >
+                 <option value=''>Status</option>
+                 <option value='Paid'>Paid</option>
+                 <option value='Free'>Free</option>
+               </select>
 
-          <div className='bg-white shadow rounded-lg overflow-x-auto'>
-            <table className='w-full text-left text-sm'>
-              <thead className='bg-gray-50 text-gray-600 uppercase text-xs'>
-                <tr>
-                  <th className='p-4 font-semibold'>Name</th>
-                  <th className='p-4 font-semibold'>Email</th>
-                  <th className='p-4 font-semibold'>User Type</th>
-                  <th className='p-4 font-semibold'>Joined On</th>
-                  <th className='p-4 font-semibold'>Actions</th>
-                </tr>
-              </thead>
-              <tbody className='divide-y divide-gray-200'>
-                {users.map((user) => (
-                  <tr key={user._id} className='hover:bg-gray-50'>
-                    <td className='p-4 font-medium text-gray-900'>
-                      {user.name}
-                    </td>
-                    <td className='p-4 text-gray-700'>{user.email}</td>
-                    <td className='p-4'>
-                      <UserTypeBadge type={user.isPaid ? "Paid" : "Free"} />
-                    </td>
-                    <td className='p-4 text-gray-700'>
-                      {new Date(user.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className='p-4'>
-                      <button
-                        onClick={() => fetchUserProfile(user)}
-                        className='px-3 py-1 rounded text-sm text-white'
-                        style={{ backgroundColor: "#008080" }} // Teal color
-                      >
-                        View
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </main>
-      </div>
+               <select
+                 value={userTypeFilter}
+                 onChange={(e) => setUserTypeFilter(e.target.value)}
+                 className='border rounded px-3 py-1 text-sm'
+               >
+                 <option value=''>User Type</option>
+                 <option value='Admin'>Admin</option>
+                 <option value='User'>User</option>
+                 {/* add other types as needed */}
+               </select>
+               <input
+                 type='text'
+                 value={searchTerm}
+                 onChange={(e) => setSearchTerm(e.target.value)}
+                 placeholder='Search by name, email, or phone...'
+                 className='border rounded px-3 py-1 text-sm w-full md:w-64'
+               />
+             </div>
 
-      {/* Modal */}
-      {selectedUser && (
-        <UserDetailsModal
-          user={selectedUser}
-          profile={selectedProfile}
-          reports={selectedReports} // ✅ now hazards come from backend
-          loading={profileLoading}
-          onClose={() => {
-            setSelectedUser(null);
-            setSelectedProfile(null);
-            setSelectedReports([]);
-          }}
-        />
-      )}
-    </div>
-  );
+             <div className='flex gap-2'>
+               <button
+                 onClick={handleResetFilters}
+                 className='border rounded px-3 py-1 text-sm text-gray-600 hover:bg-gray-100'
+               >
+                 Clear Filters
+               </button>
+             </div>
+           </div>
+
+           <div className='bg-white shadow rounded-lg overflow-x-auto'>
+             <table className='w-full text-left text-sm'>
+               <thead className='bg-gray-50 text-gray-600 uppercase text-xs'>
+                 <tr>
+                   <th className='p-4 font-semibold'>Name</th>
+                   <th className='p-4 font-semibold'>Email / Phone</th>
+                   <th className='p-4 font-semibold'>User Type</th>
+                   <th className='p-4 font-semibold'>Joined On</th>
+                   <th className='p-4 font-semibold'>Actions</th>
+                 </tr>
+               </thead>
+               <tbody className='divide-y divide-gray-200'>
+                 {filteredUsers.map((user) => (
+                   <tr key={user._id} className='hover:bg-gray-50'>
+                     <td className='p-4 font-medium text-gray-900'>
+                       {user.name}
+                     </td>
+                     <td className='p-4 text-gray-700'>{user.email}</td>
+                     <td className='p-4'>
+                       <UserTypeBadge type={user.isPaid ? "Paid" : "Free"} />
+                     </td>
+                     <td className='p-4 text-gray-700'>
+                       {new Date(user.createdAt).toLocaleDateString()}
+                     </td>
+                     <td className='p-4'>
+                       <button
+                         onClick={() => fetchUserProfile(user)}
+                         className='px-3 py-1 rounded text-sm text-white bg-gradient-to-b from-[#008080] to-[#004040]'
+                       >
+                         View
+                       </button>
+                     </td>
+                   </tr>
+                 ))}
+               </tbody>
+             </table>
+           </div>
+         </main>
+       </div>
+
+       {selectedUser && (
+         <UserDetailsModal
+           user={selectedUser}
+           profile={selectedProfile}
+           reports={selectedReports}
+           loading={profileLoading}
+           onClose={() => {
+             setSelectedUser(null);
+             setSelectedProfile(null);
+             setSelectedReports([]);
+           }}
+         />
+       )}
+     </div>
+   );
 };
+
+
 
 export default UserManagementPage;

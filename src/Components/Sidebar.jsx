@@ -6,15 +6,20 @@ import {
   HiOutlineExclamationCircle,
   HiOutlineUsers,
   HiOutlineCog,
+    HiOutlineUserGroup,
 } from "react-icons/hi";
+import { RiDashboard3Line } from "react-icons/ri";
+import { RiAlertFill } from "react-icons/ri";
 // --- SVG Icon Components for Sidebar ---
-const DashboardIcon = () => <HiOutlineViewGrid className='w-5 h-5' />;
+const DashboardIcon = () => <RiDashboard3Line className='w-5 h-5' />;
 
 // Truqie Icon
 const TruqieIcon = () => <HiOutlineExclamationCircle className='w-5 h-5' />;
-
+const TruqieAlertIcon = () => (
+  <RiAlertFill className='w-5 h-5' />
+);
 // User Management Icon
-const UserManagementIcon = () => <HiOutlineUsers className='w-5 h-5' />;
+const UserManagementIcon = () => <HiOutlineUserGroup className='w-5 h-5' />;
 
 // Settings Icon
 const SettingsIcon = () => <HiOutlineCog className='w-5 h-5' />;
@@ -25,7 +30,7 @@ const Sidebar = () => {
 
   const navItems = [
     { route: "/dashboard", label: "Dashboard", icon: <DashboardIcon /> },
-    { route: "/truique", label: "Truique", icon: <TruqieIcon /> },
+    { route: "/truique", label: "Truique", icon: <TruqieAlertIcon /> },
     {
       route: "/userManagement",
       label: "User Management",

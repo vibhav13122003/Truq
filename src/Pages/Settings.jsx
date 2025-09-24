@@ -1,43 +1,50 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../Components/Sidebar";
 import axios from "axios";
 import { HiOutlineUser } from "react-icons/hi";
 
-const UserIcon = () => <HiOutlineUser className='w-5 h-5 text-gray-600' />;
+const UsersIcon = () => (
+  <HiOutlineUser className='w-6 h-6' />
+);
 
 const SettingsPage = () => {
-  const [name, setName] = useState("John Anderson");
+  const navigate = useNavigate();
+  const [name, setName] = useState(localStorage.getItem("name") || "");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-const handleAdminUpdate = async (userId) => {
-  if (newPassword && newPassword !== confirmPassword) {
-    alert("New password and confirmation do not match");
-    return;
-  }
 
-  try {
-    const token = localStorage.getItem("token");
+  const handleAdminUpdate = async (userId) => {
+    if (newPassword && newPassword !== confirmPassword) {
+      alert("New password and confirmation do not match");
+      return;
+    }
 
-    const res = await axios.put(
-      `https://truq-backend-vfnps.ondigitalocean.app/api/auth/admin-update-user/${userId}`,
-      {
-        name,
-        password: newPassword || undefined, // only send if exists
-      },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+    try {
+      const token = localStorage.getItem("token");
 
-    alert(res.data.msg);
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
-  } catch (err) {
-    console.error(err);
-    alert(err.response?.data?.msg || "Admin update failed");
-  }
-};
+      const res = await axios.put(
+        `https://truq-backend-vfnps.ondigitalocean.app/api/auth/admin-update-user/${userId}`,
+        {
+          name,
+          password: newPassword || undefined, // only send if exists
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
+      alert(res.data.msg);
+      localStorage.setItem("name", res.data.user.name); // update localStorage
+      setName(res.data.user.name);
+
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.msg || "Admin update failed");
+    }
+  };
 
   const handlePasswordUpdate = async () => {
     if (newPassword !== confirmPassword) {
@@ -46,7 +53,7 @@ const handleAdminUpdate = async (userId) => {
     }
 
     try {
-      const token = localStorage.getItem("token"); // JWT token
+      const token = localStorage.getItem("token");
 
       const res = await axios.put(
         "https://truq-backend-vfnps.ondigitalocean.app/api/users/update-profile",
@@ -63,6 +70,12 @@ const handleAdminUpdate = async (userId) => {
       alert(err.response?.data?.msg || "Password update failed");
     }
   };
+
+  const handleLogout = () => {
+    localStorage.clear(); // clear everything
+    navigate("/"); // redirect to login page
+  };
+
   const userId = localStorage.getItem("userId");
 
   return (
@@ -73,9 +86,11 @@ const handleAdminUpdate = async (userId) => {
         <header className='bg-white shadow-sm p-4 border-b border-gray-200'>
           <div className='flex justify-between items-center'>
             <h1 className='text-xl font-semibold text-gray-700'>Admin Panel</h1>
-            <button className='flex items-center p-2 rounded-full bg-gray-100 hover:bg-gray-200'>
-              <UserIcon />
-            </button>
+            <div className='flex items-center gap-4'>
+              <button className='flex items-center p-2 rounded-full bg-gradient-to-b from-[#008080] to-[#004040] hover:bg-teal-700 text-white'>
+                <UsersIcon />
+              </button>
+            </div>
           </div>
         </header>
 
@@ -101,7 +116,7 @@ const handleAdminUpdate = async (userId) => {
             <div className='mt-4'>
               <button
                 onClick={() => handleAdminUpdate(userId)}
-                className='px-5 py-2 bg-teal-700 text-white rounded-md hover:bg-teal-800 text-sm font-semibold'
+                className='px-5 py-2  text-white bg-gradient-to-b from-[#008080] to-[#004040] rounded-md hover:bg-teal-800 text-sm font-semibold'
               >
                 Save Changes
               </button>
@@ -151,12 +166,27 @@ const handleAdminUpdate = async (userId) => {
                 />
               </div>
             </div>
+            {/* Account Actions */}
             <div className='mt-4'>
               <button
-                onClick={() => handleAdminUpdate(userId)}
-                className='px-5 py-2 bg-teal-700 text-white rounded-md hover:bg-teal-800 text-sm font-semibold'
+                onClick={() => handlePasswordUpdate(userId)}
+                className='px-5 py-2 bg-gradient-to-b from-[#008080] to-[#004040] text-white rounded-md hover:bg-teal-800 text-sm font-semibold'
               >
                 Update Password
+              </button>
+            </div>
+          </div>
+          <div className='bg-white rounded-lg shadow p-6 mb-6'>
+            <h2 className='text-lg font-semibold text-gray-700 mb-4'>
+              Account Action
+            </h2>
+
+            <div className='mt-4'>
+              <button
+                onClick={handleLogout}
+                className='px-5 py-2  text-white bg-gradient-to-b from-[#008080] to-[#004040] rounded-md hover:bg-teal-800 text-sm font-semibold'
+              >
+                Logout
               </button>
             </div>
           </div>
