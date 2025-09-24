@@ -100,8 +100,8 @@ const SettingsPage = () => {
             <h2 className='text-lg font-semibold text-gray-700 mb-4'>
               Profile Information
             </h2>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-              <div>
+            <div className='flex w-full'>
+              <div className="w-full">
                 <label className='block text-sm font-medium text-gray-600 mb-1'>
                   Name
                 </label>
@@ -113,7 +113,7 @@ const SettingsPage = () => {
                 />
               </div>
             </div>
-            <div className='mt-4'>
+            <div className='mt-4 flex justify-end'>
               <button
                 onClick={() => handleAdminUpdate(userId)}
                 className='px-5 py-2  text-white bg-gradient-to-b from-[#008080] to-[#004040] rounded-md hover:bg-teal-800 text-sm font-semibold'
@@ -128,9 +128,9 @@ const SettingsPage = () => {
             <h2 className='text-lg font-semibold text-gray-700 mb-4'>
               Change Password
             </h2>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            <div className='flex flex-col gap-4'>
               <div>
-                <label className='block text-sm font-medium text-gray-600 mb-1'>
+                <label className='block text-sm font-medium text-gray-600 mb-1 w-full'>
                   Current Password
                 </label>
                 <input
@@ -167,7 +167,7 @@ const SettingsPage = () => {
               </div>
             </div>
             {/* Account Actions */}
-            <div className='mt-4'>
+            <div className='mt-4 flex justify-end'>
               <button
                 onClick={() => handlePasswordUpdate(userId)}
                 className='px-5 py-2 bg-gradient-to-b from-[#008080] to-[#004040] text-white rounded-md hover:bg-teal-800 text-sm font-semibold'
@@ -181,7 +181,7 @@ const SettingsPage = () => {
               Account Action
             </h2>
 
-            <div className='mt-4'>
+            <div className='mt-4 '>
               <button
                 onClick={handleLogout}
                 className='px-5 py-2  text-white bg-gradient-to-b from-[#008080] to-[#004040] rounded-md hover:bg-teal-800 text-sm font-semibold'
