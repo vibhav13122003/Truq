@@ -2,8 +2,9 @@ const express = require('express');
 const router = express.Router();
 const hazardController = require('../controller/hazardController');
 const upload = require('../middleware/uploadtoSpace');
+const { protect } = require('../middleware/authMiddleware');
 
-router.post('/', upload.array('photos', 2), hazardController.createHazard);
+router.post('/', protect,upload.array('photos', 2), hazardController.createHazard);
 
 router.get('/', hazardController.getHazards);
 router.get('/:id', hazardController.getHazardById);

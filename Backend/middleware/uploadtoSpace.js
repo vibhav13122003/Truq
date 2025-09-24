@@ -1,11 +1,13 @@
+require('dotenv').config();
+
 const { S3Client } = require("@aws-sdk/client-s3");
 const multer = require("multer");
 const multerS3 = require("multer-s3");
 
 // Configure S3 client for DigitalOcean Spaces
 const s3 = new S3Client({
-    region: "nyc3", // replace with your Space region
-    endpoint: "https://nyc3.digitaloceanspaces.com", // Spaces endpoint
+    region: "blr1", // replace with your Space region
+    endpoint: "https://blr1.digitaloceanspaces.com", // Spaces endpoint
     credentials: {
         accessKeyId: process.env.DO_SPACES_KEY,
         secretAccessKey: process.env.DO_SPACES_SECRET,

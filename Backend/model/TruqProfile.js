@@ -68,11 +68,18 @@ const ProfileSchema = new Schema({
         default: false
     },
 
-    trailers: [EmbeddedTrailerSchema]
+    trailers:{ 
+        type:[EmbeddedTrailerSchema],
+        validate: [arrayLimit, '{PATH} exceeds the limit of 6']
+
+    }
 }, {
     
     timestamps: true
 });
+function arrayLimit(val) {
+    return val.length <= 6;
+}
 
 const Profile = mongoose.model('Profile', ProfileSchema);
 
