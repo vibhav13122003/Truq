@@ -3,10 +3,9 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "../Components/Sidebar";
 import axios from "axios";
 import { HiOutlineUser } from "react-icons/hi";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
-const UsersIcon = () => (
-  <HiOutlineUser className='w-6 h-6' />
-);
+const UsersIcon = () => <HiOutlineUser className='w-6 h-6' />;
 
 const SettingsPage = () => {
   const navigate = useNavigate();
@@ -14,6 +13,9 @@ const SettingsPage = () => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleAdminUpdate = async (userId) => {
     if (newPassword && newPassword !== confirmPassword) {
@@ -96,9 +98,7 @@ const SettingsPage = () => {
 
         <main className='p-8 overflow-y-auto'>
           {/* Profile Information */}
-          <h2 className='text-3xl font-bold text-gray-800 mb-2'>
-            Settings
-          </h2>
+          <h2 className='text-3xl font-bold text-gray-800 mb-2'>Settings</h2>
           <p className='text-gray-500 mb-6'>
             Manage and your account and system settings.
           </p>
@@ -139,37 +139,64 @@ const SettingsPage = () => {
                 <label className='block text-sm font-medium text-gray-600 mb-1 w-full'>
                   Current Password
                 </label>
-                <input
-                  type='password'
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  className='w-full border rounded-md px-3 py-2 text-sm'
-                  placeholder='Enter current password'
-                />
+                <div className='relative'>
+                  <input
+                    type={showCurrentPassword ? "text" : "password"}
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className='w-full border rounded-md px-3 py-2 text-sm'
+                    placeholder='Enter current password'
+                  />
+                  <button
+                    type='button'
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    className='absolute right-3 top-1/2 -translate-y-1/2 text-gray-500'
+                  >
+                    {showCurrentPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
               </div>
               <div>
                 <label className='block text-sm font-medium text-gray-600 mb-1'>
                   New Password
                 </label>
-                <input
-                  type='password'
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className='w-full border rounded-md px-3 py-2 text-sm'
-                  placeholder='Enter new password'
-                />
+                <div className='relative'>
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className='w-full border rounded-md px-3 py-2 text-sm'
+                    placeholder='Enter new password'
+                  />
+                  <button
+                    type='button'
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className='absolute right-3 top-1/2 -translate-y-1/2 text-gray-500'
+                  >
+                    {showNewPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
               </div>
               <div>
                 <label className='block text-sm font-medium text-gray-600 mb-1'>
                   Confirm New Password
                 </label>
-                <input
-                  type='password'
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className='w-full border rounded-md px-3 py-2 text-sm'
-                  placeholder='Confirm new password'
-                />
+                <div className='relative'>
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className='w-full border rounded-md px-3 py-2 text-sm'
+                    placeholder='Confirm new password'
+                  />
+                  <button
+                    type='button'
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className='absolute right-3 top-1/2 -translate-y-1/2 text-gray-500'
+                  >
+                    {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
               </div>
             </div>
             {/* Account Actions */}
@@ -186,11 +213,14 @@ const SettingsPage = () => {
             <h2 className='text-lg font-semibold text-gray-700 mb-4'>
               Account Action
             </h2>
-
+            <p>
+              Sign out of your admin account. You will need to log in again to
+              access the admin panel.
+            </p>
             <div className='mt-4 '>
               <button
                 onClick={handleLogout}
-                className='px-5 py-2  text-white bg-gradient-to-b from-[#008080] to-[#004040] rounded-md hover:bg-teal-800 text-sm font-semibold'
+                className='px-5 py-2  text-[#008080] bg-white rounded-md border-2 text-sm font-semibold border-[#008080] hover:bg-gray-200'
               >
                 Logout
               </button>
