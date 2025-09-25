@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Sidebar from "../Components/Sidebar";
-import { HiOutlineUser } from "react-icons/hi";
-import { HiCheck, HiX, HiTrash } from "react-icons/hi";
-// --- Modal Component ---
+import { HiOutlineUser, HiCheck, HiX, HiTrash, HiSearch } from "react-icons/hi";
+
 const ReportDetailModal = ({
   report,
   onClose,
@@ -20,15 +19,13 @@ const ReportDetailModal = ({
         url = `https://truq-backend-vfnps.ondigitalocean.app/api/hazards/${report._id}/approve`;
       } else if (action === "Delete") {
         method = "DELETE";
-      }
-      else if (action === "Reject") {
+      } else if (action === "Reject") {
         url = `https://truq-backend-vfnps.ondigitalocean.app/api/hazards/${report._id}/reject`;
       }
 
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        // For Reject, we send a specific body. For others, it might be empty.
         body:
           action === "Reject"
             ? JSON.stringify({ isApproved: false })
@@ -154,14 +151,16 @@ const ReportDetailModal = ({
   );
 };
 
-const UsersIcon = () => (
-  <HiOutlineUser className='w-6 h-6' />
-);
+const UsersIcon = () => <HiOutlineUser className='w-6 h-6' />;
 // --- Main Page Component ---
 const TruqieReports = () => {
   const [currentRoute, setRoute] = useState("truqie");
   const [selectedReport, setSelectedReport] = useState(null);
   const [hazards, setHazards] = useState([]);
+
+  // State for filters and search
+  const [statusFilter, setStatusFilter] = useState("All Status");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const statusColors = {
     Pending: "bg-[#F3F4F6] text-[#374151]",
@@ -169,7 +168,6 @@ const TruqieReports = () => {
     Rejected: "bg-[#FEE2E2] text-[#991B1B]",
   };
 
-  // ✅ **FIX:** Define fetchHazards outside useEffect, wrapped in useCallback
   const fetchHazards = useCallback(async () => {
     try {
       const res = await fetch(
@@ -181,30 +179,51 @@ const TruqieReports = () => {
 
       const formatted = data.hazards.map((h, index) => {
         const year = new Date(h.createdAt).getFullYear();
-     return {
-       ...h,
-       id: `HR-${year}-${String(index + 1).padStart(3, "0")}`,
-       datetime: h.createdAt,
-       location: h.location,
-       email: h.user?.email || "Unknown",
-       hazard: h.hazardClass,
-       vehicles: h.vehicleType,
-       status: h.status, // Directly use the status from the API
-       description: h.description,
-       imageUrl: h.photos?.[0] || null,
-     };
+        return {
+          ...h,
+          id: `HR-${year}-${String(index + 1).padStart(3, "0")}`,
+          datetime: h.createdAt,
+          location: h.location,
+          email: h.user?.email || "Unknown",
+          hazard: h.hazardClass,
+          vehicles: h.vehicleType,
+          status: h.status, // Directly use the status from the API
+          description: h.description,
+          imageUrl: h.photos?.[0] || null,
+        };
       });
 
       setHazards(formatted);
     } catch (err) {
       console.error("Error fetching hazards:", err);
     }
-  }, []); // No dependencies, so it's created only once.
+  }, []);
 
-  // ✅ **FIX:** Call the memoized fetchHazards function on component mount
   useEffect(() => {
     fetchHazards();
   }, [fetchHazards]);
+
+  // Handle clearing filters
+  const handleClearFilters = () => {
+    setStatusFilter("All Status");
+    setSearchQuery("");
+  };
+
+  // Derived state for filtered hazards
+  const filteredHazards = hazards.filter((report) => {
+    const matchesStatus =
+      statusFilter === "All Status" || report.status === statusFilter;
+
+    const lowercasedQuery = searchQuery.toLowerCase();
+    const matchesSearch =
+      searchQuery === "" ||
+      report.id.toLowerCase().includes(lowercasedQuery) ||
+      report.location.toLowerCase().includes(lowercasedQuery) ||
+      report.hazard.toLowerCase().includes(lowercasedQuery) ||
+      report.email.toLowerCase().includes(lowercasedQuery);
+
+    return matchesStatus && matchesSearch;
+  });
 
   return (
     <div className='flex h-screen'>
@@ -223,12 +242,54 @@ const TruqieReports = () => {
             Truqie Reports
           </h2>
           <p className='text-gray-500 mb-6'>
-            Manage and moderate reports by the drivers
+            Manage and moderate reports submitted by drivers
           </p>
+
+          {/* --- NEW: Filters and Search Bar --- */}
+          <div className='flex items-center justify-between mb-4'>
+            <div className='flex items-center space-x-4'>
+              {/* Status Filter Dropdown */}
+              <select
+                id='status'
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className='bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 block w-full p-2.5'
+              >
+                <option>All Status</option>
+                <option>Pending</option>
+                <option>Verified</option>
+                <option>Rejected</option>
+              </select>
+
+              {/* Search Input */}
+              <div className='relative'>
+                <div className='absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none'>
+                  <HiSearch className='w-5 h-5 text-gray-400' />
+                </div>
+                <input
+                  type='text'
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder='Search by location, type, or ID...'
+                  className='bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 block w-80 p-2.5 pl-10'
+                />
+              </div>
+            </div>
+
+            {/* Clear Filters Button */}
+            <button
+              onClick={handleClearFilters}
+              className='flex items-center px-3 py-2 text-sm text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-100'
+            >
+              <HiX className='w-4 h-4 mr-1' />
+              Clear Filters
+            </button>
+          </div>
+          {/* --- END: Filters and Search Bar --- */}
 
           <div className='bg-white rounded-lg shadow-md overflow-x-auto mb-6'>
             <table className='min-w-full text-sm text-gray-600'>
-              <thead className='bg-gray-50 text-xs text-gray-700 uppercase tracking-wider'>
+              <thead className='bg-[#DBDBDB] text-xs text-gray-700 uppercase tracking-wider'>
                 <tr>
                   {[
                     "Report ID",
@@ -247,7 +308,7 @@ const TruqieReports = () => {
                 </tr>
               </thead>
               <tbody>
-                {hazards.map((r) => (
+                {filteredHazards.map((r) => (
                   <tr
                     key={r.id}
                     className='border-b last:border-none hover:bg-gray-50'
@@ -282,10 +343,44 @@ const TruqieReports = () => {
               </tbody>
             </table>
           </div>
+
+          {/* --- NEW: Status Legend --- */}
+          <div className='bg-white rounded-lg shadow-md p-6'>
+            <h3 className='text-lg font-semibold text-gray-800 mb-4'>
+              Status Legend
+            </h3>
+            <div className='flex flex-wrap items-center gap-x-6 gap-y-2'>
+              <div className='flex items-center space-x-2'>
+                <span
+                  className={`px-2 py-1 text-xs font-medium rounded-full ${statusColors.Pending}`}
+                >
+                  Pending
+                </span>
+                <span className='text-sm text-gray-600'>Awaiting review</span>
+              </div>
+              <div className='flex items-center space-x-2'>
+                <span
+                  className={`px-2 py-1 text-xs font-medium rounded-full ${statusColors.Verified}`}
+                >
+                  Verified
+                </span>
+                <span className='text-sm text-gray-600'>Confirmed hazard</span>
+              </div>
+              <div className='flex items-center space-x-2'>
+                <span
+                  className={`px-2 py-1 text-xs font-medium rounded-full ${statusColors.Rejected}`}
+                >
+                  Rejected
+                </span>
+                <span className='text-sm text-gray-600'>
+                  Invalid or resolved
+                </span>
+              </div>
+            </div>
+          </div>
         </main>
       </div>
 
-      {/* ✅ **FIX:** This now works because fetchHazards is in scope */}
       {selectedReport && (
         <ReportDetailModal
           report={selectedReport}

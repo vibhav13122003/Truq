@@ -8,6 +8,7 @@ import Dashboard from "./Pages/DashBoard";
 import Settings from "./Pages/Settings";
 import UserManagement from "./Pages/UserManagement";
 import Truique from "./Pages/Truique";
+import Help from "./Pages/HelpSupport"
 
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
 
         {/* User Management route */}
         <Route path='/userManagement' element={<UserManagement />} />
+        <Route path='/help' element={<Help />} />
       </Routes>
     </Router>
   );

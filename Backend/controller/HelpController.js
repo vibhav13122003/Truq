@@ -10,7 +10,7 @@ exports.createHelp = async (req, res) => {
         }
 
         const help = new HelpSupport({
-            user: req.user.id, // req.user should come from auth middleware
+            user: req.user.id, 
             subject,
             message,
             email,

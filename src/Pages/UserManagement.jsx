@@ -55,7 +55,6 @@ const UserDetailsModal = ({
 }) => {
   if (!user) return null;
 
-  // State to manage the active tab
   const [activeTab, setActiveTab] = useState("profiles");
 
   const DetailItem = ({ label, value }) => (
@@ -379,7 +378,6 @@ const UserDetailsModal = ({
   );
 };
 
-// ... a large portion of the UserManagementPage component remains the same
 const UserManagementPage = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);

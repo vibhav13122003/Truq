@@ -1,4 +1,3 @@
-// Sidebar.jsx
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
@@ -10,6 +9,7 @@ import {
 } from "react-icons/hi";
 import { RiDashboard3Line } from "react-icons/ri";
 import { RiAlertFill } from "react-icons/ri";
+import { IoMdHelpCircle } from "react-icons/io";
 // --- SVG Icon Components for Sidebar ---
 const DashboardIcon = () => <RiDashboard3Line className='w-5 h-5' />;
 
@@ -23,6 +23,9 @@ const UserManagementIcon = () => <HiOutlineUserGroup className='w-5 h-5' />;
 
 // Settings Icon
 const SettingsIcon = () => <HiOutlineCog className='w-5 h-5' />;
+// Help & Support Icon
+const HelpIcon = () => <IoMdHelpCircle className='w-5 h-5' />;
+
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -37,6 +40,7 @@ const Sidebar = () => {
       icon: <UserManagementIcon />,
     },
     { route: "/settings", label: "Settings", icon: <SettingsIcon /> },
+    { route: "/help", label: "Help & Support", icon: <HelpIcon /> },
   ];
 
   return (
@@ -58,7 +62,7 @@ const Sidebar = () => {
                 onClick={() => navigate(item.route)}
                 className={`w-full flex items-center space-x-3 p-3 rounded-lg text-left transition-colors duration-200 ${
                   location.pathname === item.route
-                    ? "bg-gray-800 text-white"
+                    ? "bg-[#004D4D] text-white"
                     : "hover:bg-teal-700"
                 }`}
               >

@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 *{
-    font-family: robo;
+    font-family: roboto;
 }
 .no-scrollbar::-webkit-scrollbar {
   display: none;
