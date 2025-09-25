@@ -294,8 +294,7 @@ const UserDetailsModal = ({
             </div>
           </div>
 
-          {/* User Submitted Reports Section (Kept for completeness) */}
-          {/* User Submitted Reports Section */}
+    
           <section>
             <h3 className='text-base font-semibold text-gray-800 mb-4'>
               User Submitted Reports
@@ -523,6 +522,12 @@ const UserManagementPage = () => {
            </div>
          </header>
          <main className='p-8 overflow-y-auto'>
+           <h2 className='text-3xl font-bold text-gray-800 mb-2'>
+             User Management
+           </h2>
+           <p className='text-gray-500 mb-6'>
+             Manage and monitor user accounts.
+           </p>
            <div className='mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
              <div className='flex gap-2'>
                <select
@@ -566,7 +571,7 @@ const UserManagementPage = () => {
 
            <div className='bg-white shadow rounded-lg overflow-x-auto'>
              <table className='w-full text-left text-sm'>
-               <thead className='bg-gray-50 text-gray-600 uppercase text-xs'>
+               <thead className='bg-[#DBDBDB] text-xs text-gray-700 uppercase'>
                  <tr>
                    <th className='p-4 font-semibold'>Name</th>
                    <th className='p-4 font-semibold'>Email / Phone</th>

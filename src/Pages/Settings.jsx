@@ -96,12 +96,18 @@ const SettingsPage = () => {
 
         <main className='p-8 overflow-y-auto'>
           {/* Profile Information */}
+          <h2 className='text-3xl font-bold text-gray-800 mb-2'>
+            Settings
+          </h2>
+          <p className='text-gray-500 mb-6'>
+            Manage and your account and system settings.
+          </p>
           <div className='bg-white rounded-lg shadow p-6 mb-6'>
             <h2 className='text-lg font-semibold text-gray-700 mb-4'>
               Profile Information
             </h2>
             <div className='flex w-full'>
-              <div className="w-full">
+              <div className='w-full'>
                 <label className='block text-sm font-medium text-gray-600 mb-1'>
                   Name
                 </label>

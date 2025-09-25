@@ -182,10 +182,9 @@ const HelpSupportPage = () => {
             </div>
           </div>
 
-          {/* Table */}
           <div className='bg-white shadow rounded-lg overflow-x-auto'>
             <table className='w-full text-left text-sm'>
-              <thead className='bg-gray-50 text-gray-600 uppercase text-xs'>
+              <thead className='bg-[#DBDBDB] text-gray-600 uppercase text-xs'>
                 <tr>
                   <th className='p-4 font-semibold'>Email</th>
                   <th className='p-4 font-semibold'>Subject</th>
@@ -211,10 +210,9 @@ const HelpSupportPage = () => {
                       <button className='px-3 py-1 rounded text-sm text-white  bg-gradient-to-b from-[#008080] to-[#004040] hover:bg-red-600'>
                         View
                       </button>
-                        <button className='px-3 py-1 rounded text-sm text-white bg-red-600 hover:bg-red-700 flex items-center gap-1'>
-                          <MdDelete className='w-4 h-4' />
-                      
-                        </button>
+                      <button className='px-3 py-1 rounded text-sm text-white bg-red-600 hover:bg-red-700 flex items-center gap-1'>
+                        <MdDelete className='w-4 h-4' />
+                      </button>
                     </td>
                   </tr>
                 ))}
