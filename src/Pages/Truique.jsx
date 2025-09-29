@@ -13,7 +13,7 @@ const ReportDetailModal = ({
   const handleAction = async (action) => {
     try {
       let url = `https://truq-backend-vfnps.ondigitalocean.app/api/hazards/${report._id}`;
-      let method = "PUT"; // Default method
+      let method = "PUT"; 
 
       if (action === "Approve") {
         url = `https://truq-backend-vfnps.ondigitalocean.app/api/hazards/${report._id}/approve`;
@@ -36,8 +36,8 @@ const ReportDetailModal = ({
       if (!res.ok) throw new Error(data.message || "Action failed");
 
       alert(`${action} successful!`);
-      refreshHazards(); // Re-fetch the list to show updated data
-      onClose(); // Close the modal
+      refreshHazards(); 
+      onClose(); 
     } catch (err) {
       console.error(err);
       alert(`Failed to ${action}: ${err.message}`);

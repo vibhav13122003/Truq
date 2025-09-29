@@ -30,13 +30,13 @@ const SettingsPage = () => {
         `https://truq-backend-vfnps.ondigitalocean.app/api/auth/admin-update-user/${userId}`,
         {
           name,
-          password: newPassword || undefined, // only send if exists
+          password: newPassword || undefined, 
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       alert(res.data.msg);
-      localStorage.setItem("name", res.data.user.name); // update localStorage
+      localStorage.setItem("name", res.data.user.name);
       setName(res.data.user.name);
 
       setCurrentPassword("");
@@ -74,8 +74,8 @@ const SettingsPage = () => {
   };
 
   const handleLogout = () => {
-    localStorage.clear(); // clear everything
-    navigate("/"); // redirect to login page
+    localStorage.clear(); 
+    navigate("/"); 
   };
 
   const userId = localStorage.getItem("userId");
@@ -97,7 +97,7 @@ const SettingsPage = () => {
         </header>
 
         <main className='p-8 overflow-y-auto'>
-          {/* Profile Information */}
+          
           <h2 className='text-3xl font-bold text-gray-800 mb-2'>Settings</h2>
           <p className='text-gray-500 mb-6'>
             Manage and your account and system settings.
@@ -129,7 +129,7 @@ const SettingsPage = () => {
             </div>
           </div>
 
-          {/* Change Password */}
+          
           <div className='bg-white rounded-lg shadow p-6 mb-6'>
             <h2 className='text-lg font-semibold text-gray-700 mb-4'>
               Change Password
@@ -199,7 +199,7 @@ const SettingsPage = () => {
                 </div>
               </div>
             </div>
-            {/* Account Actions */}
+            
             <div className='mt-4 flex justify-end'>
               <button
                 onClick={() => handlePasswordUpdate(userId)}

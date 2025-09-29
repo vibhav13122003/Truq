@@ -1,6 +1,6 @@
-// src/pages/DashboardPage.jsx
+
 import React from "react";
-import Sidebar from "../Components/Sidebar"; // ✅ make sure path is correct
+import Sidebar from "../Components/Sidebar"; 
 
 import {
   HiOutlineUsers,
@@ -16,7 +16,7 @@ import { FaCreditCard } from "react-icons/fa6";
 import { FaUserCog, FaClipboardList } from "react-icons/fa";
 
 
-// Users Icon
+
 const UsersIcon = () => (
   <HiOutlineUserGroup className='w-8 h-8' style={{ color: "#008080" }} />
 );
@@ -27,15 +27,11 @@ const TruqieAlertIcon = () => (
   <RiAlertFill className='w-8 h-8' style={{ color: "#008080" }} />
 );
 
-
-// User Icon
 const UserIcon = () => <HiOutlineUser className='w-6 h-6' />;
 
-// Down Arrow Icon
+
 const DownArrowIcon = () => <HiOutlineChevronDown className='w-4 h-4 ml-1' />;
 
-
-// --- Reusable Components ---
 const StatCard = ({ icon, value, title, subtitle }) => (
   <div className='bg-white p-6 rounded-lg shadow-md flex items-center space-x-4'>
     <div className='bg-gray-100 p-3 rounded-full'>{icon}</div>
@@ -66,7 +62,6 @@ const StatusBadge = ({ status }) => {
   return <span className={`${baseClasses} ${statusClasses}`}>{status}</span>;
 };
 
-// --- Main Dashboard ---
 const DashboardPage = () => {
   const stats = [
     {
@@ -124,12 +119,9 @@ const DashboardPage = () => {
 
   return (
     <div className='flex h-screen'>
-      {/* Sidebar on left */}
       <Sidebar />
 
-      {/* Dashboard content */}
       <div className='bg-gray-50 flex-1 flex flex-col'>
-        {/* Header */}
         <header className='bg-white shadow-sm p-4 border-b border-gray-200'>
           <div className='flex justify-between items-center'>
             <h1 className='text-xl font-semibold text-gray-700'>Admin Panel</h1>
@@ -160,8 +152,8 @@ const DashboardPage = () => {
               Recent truqie
             </h3>
             <div className='overflow-x-auto'>
-              <table className='min-w-full text-sm text-left text-gray-600'>
-                <thead className='bg-gray-50 text-xs text-gray-700 uppercase tracking-wider'>
+              <table className='min-w-full text-sm text-gray-600'>
+                <thead className='bg-[#DBDBDB] text-xs text-gray-700 uppercase tracking-wider'>
                   <tr>
                     <th className='p-4'>Date</th>
                     <th className='p-4'>Location</th>

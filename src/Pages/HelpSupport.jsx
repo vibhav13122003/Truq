@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "../Components/Sidebar";
-import { HiOutlineUser } from "react-icons/hi";
+import { HiOutlineUser, HiSearch } from "react-icons/hi";
 import { MdDelete } from "react-icons/md";
 
 const DeleteIcon = () => <MdDelete className='w-6 h-6' />;
@@ -146,7 +146,7 @@ const HelpSupportPage = () => {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className='border rounded px-3 py-1 text-sm'
+                className='bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 block  p-2.5'
               >
                 <option value=''>Status</option>
                 <option value='Open'>Open</option>
@@ -156,20 +156,25 @@ const HelpSupportPage = () => {
               <select
                 value={userTypeFilter}
                 onChange={(e) => setUserTypeFilter(e.target.value)}
-                className='border rounded px-3 py-1 text-sm'
+                className='bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 block  p-2.5'
               >
                 <option value=''>User Type</option>
                 <option value='Paid'>Paid</option>
                 <option value='Free'>Free</option>
               </select>
 
-              <input
-                type='text'
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder='Search by name, email, or phone...'
-                className='border rounded px-3 py-1 text-sm w-full md:w-64'
-              />
+               <div className='relative'>
+                              <div className='absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none'>
+                                <HiSearch className='w-5 h-5 text-gray-400' />
+                              </div>
+                              <input
+                                type='text'
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                placeholder='Search by location, type, or ID...'
+                                className='bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 block w-80 p-2.5 pl-10'
+                              />
+                            </div>
             </div>
 
             <div>

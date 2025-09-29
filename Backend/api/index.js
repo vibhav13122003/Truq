@@ -40,6 +40,7 @@ app.use(cookieParser());
 app.use("/api/auth", authRoutes);
 app.use("/api/profiles", profileRoutes);
 app.use("/api/hazards", hazardRoutes);
+app.use("/api/help", helproutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

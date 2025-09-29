@@ -3,13 +3,13 @@ import { useNavigate } from "react-router-dom";
 
 import { HiOutlineEye, HiOutlineEyeOff } from "react-icons/hi";
 
-// Eye Icon
+
 const EyeIcon = () => <HiOutlineEye className='h-5 w-5' />;
 
-// Eye Off Icon
+
 const EyeOffIcon = () => <HiOutlineEyeOff className='h-5 w-5' />;
 
-// --- Login Page Component ---
+
 const LoginPage = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
