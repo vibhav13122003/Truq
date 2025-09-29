@@ -155,12 +155,13 @@ const DashboardPage = () => {
               <table className='min-w-full text-sm text-gray-600'>
                 <thead className='bg-[#DBDBDB] text-xs text-gray-700 uppercase tracking-wider'>
                   <tr>
-                    <th className='p-4'>Date</th>
-                    <th className='p-4'>Location</th>
-                    <th className='p-4'>Type</th>
-                    <th className='p-4'>Status</th>
+                    <th className='p-4 text-left'>Date</th>
+                    <th className='p-4 text-left'>Location</th>
+                    <th className='p-4 text-left'>Type</th>
+                    <th className='p-4 text-left'>Status</th>
                   </tr>
                 </thead>
+                {/* asssssssssssssssssssss */}
                 <tbody>
                   {recentTruqies.map((item, index) => (
                     <tr key={index} className='border-b'>
